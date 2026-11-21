@@ -1,0 +1,14 @@
+{
+  "servers": {
+    "unrealMCP": {
+      "type": "stdio",
+      "command": "C:\\Users\\joshu\\AppData\\Roaming\\Python\\Python315\\Scripts\\uv.exe",
+      "args": [
+        "--directory",
+        "C:\\Users\\joshu\\Documents\\GitHub\\ClaudeProjects\\.tools\\unreal-engine-mcp\\Python",
+        "run",
+        "unreal_mcp_server_advanced.py"
+      ]
+    }
+  }
+}
