@@ -1,6 +1,7 @@
 import base64
 import ast
 import inspect
+import tkinter as tk
 from pathlib import Path
 
 import pymupdf
@@ -20,6 +21,13 @@ from core.annotations import parse_watermark_page_selection
 from core.extraction import extract_images
 from core.forms import fill_fields, list_fields
 from ui.main_window import parse_color, parse_points, parse_quads, parse_rect
+from ui.viewer import (
+    bind_drop_target,
+    canvas_point_to_pdf,
+    canvas_rect_to_pdf,
+    rendered_point_to_pdf,
+    rendered_rect_to_pdf,
+)
 
 
 PNG_1X1 = base64.b64decode(
@@ -199,6 +207,59 @@ def test_watermark_selection_rejects_invalid_values(tmp_path):
             assert str(exc) == "invalid-watermark-page-selection"
         else:
             raise AssertionError(f"Invalid watermark selection accepted: {selected}")
+
+
+def test_unsupported_drop_binding_does_not_crash():
+    class UnsupportedDropMaster:
+        def bind(self, sequence, callback):
+            if sequence == "<Drop>":
+                raise tk.TclError('bad event type or keysym "Drop"')
+
+    bind_drop_target(UnsupportedDropMaster(), lambda _event: "break")
+
+
+def test_visual_selection_coordinate_mapping():
+    assert canvas_point_to_pdf(600, 300, 2.0) == (300.0, 150.0)
+    assert canvas_rect_to_pdf(600, 300, 200, 100, 2.0) == (100.0, 50.0, 300.0, 150.0)
+
+
+def test_visual_selection_zoom_and_page_size_mapping():
+    assert canvas_point_to_pdf(450, 225, 1.5) == (300.0, 150.0)
+
+
+def test_rendered_selection_mapping_accounts_for_page_rotation_and_cropbox():
+    page_rect = pymupdf.Rect(10, 20, 310, 220)
+    assert rendered_point_to_pdf(600, 400, page_rect, 600, 400) == (310.0, 220.0)
+    assert rendered_rect_to_pdf(600, 400, 200, 100, page_rect, 600, 400) == (
+        110.0,
+        70.0,
+        310.0,
+        220.0,
+    )
+
+
+def test_rendered_selection_mapping_clamps_scroll_overflow():
+    page_rect = pymupdf.Rect(10, 20, 210, 220)
+    assert rendered_point_to_pdf(-20, 500, page_rect, 400, 400) == (10.0, 220.0)
+
+
+def test_rendered_selection_save_reopen(tmp_path):
+    source = tmp_path / "source.pdf"
+    make_source(source)
+    page_rect = pymupdf.Rect(0, 0, 200, 200)
+    rect = rendered_rect_to_pdf(40, 40, 160, 100, page_rect, 400, 400)
+
+    output = tmp_path / "selected-text.pdf"
+    insert_text(
+        str(source),
+        0,
+        "SELECTED",
+        rect,
+        font_size=10,
+        output=str(output),
+    )
+    with pymupdf.open(output) as doc:
+        assert "SELECTED" in doc[0].get_text()
 
 
 def test_existing_destination_requires_confirmation(tmp_path):

@@ -73,6 +73,7 @@ documents without uploading them to an internet service.
 | REQ-014 | Save changes to a new filename by default. Before any merge, split, reorder/delete, security, form, extraction, text edit, image edit, annotation, rotation, or watermark operation replaces an existing destination or source file, the application requires explicit confirmation. Cancellation preserves both source and destination; successful output is written completely through an atomic temporary-file/replacement transaction so no partial PDF is presented as successful. | Must | Applying edits never modifies the source file unless overwrite is explicitly selected and confirmed. Existing destinations for every operation require confirmation, cancellation is non-destructive, and failed PDF writes leave no partial output. | Accepted |
 | REQ-015 | Treat corrupted, locked, unsupported, or failed-output files as recoverable errors. | Must | The application displays the filename and safe next action; no partial output is presented as successful. | Accepted |
 | REQ-016 | Expose a help/about view containing version and third-party license information. | Should | Version and bundled dependency licenses are discoverable from the UI. | Accepted |
+| REQ-017 | Let users specify page locations and rectangular bounds for text, image, and rectangular annotation operations by selecting directly on the rendered page, rather than requiring users to calculate PDF coordinates. Map the displayed selection to the correct PDF page coordinates at the current zoom, scroll position, and page dimensions. Freehand annotations are drawn on the rendered page. | Must | At multiple zoom levels, scroll offsets, and page sizes, the app displays the selected region/path over the page and saves the operation at the corresponding PDF location; canceling selection creates no output. No coordinate arithmetic is required from the user. | Proposed; requirements review required |
 
 ## 5. Inputs, Outputs, and Constraints
 
@@ -153,8 +154,8 @@ not yet verified.
 | Scaffold item | Function / deliverable | Requirement / test IDs | Phase | State |
 |---|---|---|---|---|
 | `pdf_editor.py` | Application entry point, startup validation, and main workflow | REQ-001; REQ-014; TEST-001 | 1 | [x] |
-| `ui/main_window.py` | Native-style application shell and operation controls | REQ-001; REQ-014; TEST-009 | 1-2 | [x] |
-| `ui/viewer.py` | PDF display, thumbnails, page navigation, zoom, and selection | REQ-002 | 2 | [x] |
+| `ui/main_window.py` | Native-style application shell and operation controls | REQ-001; REQ-014; REQ-017; TEST-009; TEST-014 | 1-2, 4 | [x] |
+| `ui/viewer.py` | PDF display, thumbnails, page navigation, zoom, and interactive page selection | REQ-002; REQ-017; TEST-014 | 2, 4 | [x] |
 | `ui/dialogs.py` | File, password, overwrite, warning, export, and help dialogs | REQ-001; REQ-010; REQ-014-016 | 2-4 | [x] |
 | `core/document.py` | Open/save transactions, merge, split, rotate, reorder, and delete | REQ-001; REQ-003-004; REQ-007-008; REQ-014-015 | 1-3 | [x] |
 | `core/annotations.py` | Text, highlight, underline, shape, freehand, comments, and watermarks | REQ-009; REQ-013 | 4 | [x] |
@@ -162,8 +163,8 @@ not yet verified.
 | `core/forms.py` | AcroForm discovery and supported field updates | REQ-011 | 4 | [x] |
 | `core/security.py` | Password validation, encryption, and decryption | REQ-010 | 4 | [x] |
 | `core/extraction.py` | Text and image extraction/export | REQ-012 | 4 | [x] |
-| `tests/unit/` | Dependency, page-range, password, transaction, annotation, image, and extraction unit coverage | TEST-003-006; TEST-008-009; TEST-011 | 1-5 | [x] |
-| `tests/integration/` | Fixture manifest and baseline valid/damaged/100-page integration coverage | TEST-001-010; TEST-012 | 2-5 | [x] |
+| `tests/unit/` | Dependency, page-range, password, transaction, annotation, image, extraction, and display-to-PDF coordinate mapping coverage | TEST-003-006; TEST-008-009; TEST-011; TEST-014 | 1-5 | [ ] |
+| `tests/integration/` | Fixture manifest, baseline valid/damaged/100-page coverage, and visual editing selection round trips | TEST-001-010; TEST-012; TEST-014 | 2-5 | [ ] |
 | `fixtures/pdf/` | Valid, damaged, encrypted, form, annotation, image, watermark, and 100-page fixtures | TEST-002-008; TEST-011-012 | 1-5 | [x] |
 | `pyproject.toml` | Python requirement, dependencies, tooling, and reproducible environment metadata | Input constraints; TEST-013 | 1 | [x] |
 | `requirements.lock` | Pinned dependency set for reproducible source builds | Packaging constraints; TEST-013 | 1 | [x] |
@@ -197,7 +198,7 @@ windowed, single-file executable identified in the constraints.
 | 1 | Dependency spike and document transaction prototype | Open/save, corrupted input, and atomic output behavior pass fixture tests | Complete |
 | 2 | Viewer, thumbnails, zoom, navigation, and page selection | 100-page and encrypted fixture workflows pass manual tests | Complete |
 | 3 | Merge, split, rotate, reorder, delete, and save flows | REQ-003, REQ-004, REQ-007, REQ-008 and save safety pass | Complete |
-| 4 | Text, image, annotation, form, security, extraction, and watermark features | REQ-005 through REQ-013 pass fixture tests | Complete |
+| 4 | Text, image, annotation, form, security, extraction, and watermark features | REQ-005 through REQ-013 and REQ-017 pass fixture tests | Complete |
 | 5 | Hardening, packaging, and Windows executable validation | Clean-machine launch, antivirus-signing caveats, and source/package acceptance pass | Source rebuild complete; executable validation remains pending code review/build-exe |
 
 ## 7. Error Handling, Safety, and Security
@@ -230,6 +231,7 @@ windowed, single-file executable identified in the constraints.
 | TEST-011 | Page-range grammar | `1-3,5,9-12` returns 8 unique pages; reversed, out-of-bounds, overlapping, duplicate, empty, whitespace, separate-output, and name-collision cases follow REQ-004 exactly | Unit |
 | TEST-012 | Fixture baseline | Every listed baseline fixture opens or fails predictably; every required operation result is `pass`, `fail`, or `not-applicable`; supported annotations/forms save and persist after reopen in the application | Automated plus manual |
 | TEST-013 | Reproducible packaging | Clean build from the pinned lockfile documents the same dependency set and launches on a clean Windows VM | Build automation/manual VM |
+| TEST-014 | Visual editing selection | Text, image, and rectangular annotation operations can be positioned by selecting on the page preview; freehand paths are drawn on it. Selections map correctly to PDF points across zoom levels, canvas scrolling, and different page sizes. Canceling leaves the document and output unchanged. | Automated coordinate mapping plus application UI integration |
 
 ## 9. Critical Issues
 
@@ -252,6 +254,8 @@ windowed, single-file executable identified in the constraints.
 | CRIT-015 | Duplicate watermark page selections have conflicting acceptance rules. | Duplicate handling may remain nondeterministic even though selected-page behavior is otherwise specified. | REC-013 proposes rejecting duplicate page selections, but REQ-013 and TEST-007 previously omitted duplicates. | REQ-013 and TEST-007 now reject duplicate values with `invalid-watermark-page-selection` and no output. | Resolved; requirements corrected | Requirements re-review passed 2026-11-21 |
 | CRIT-016 | The text and image watermark UI references an overwrite variable that is not initialized. | Both watermark workflows raise `UnboundLocalError` and cannot create or save a destination PDF. | `ui/main_window.py:574-588` passed `overwrite=overwrite` without defining or confirming `overwrite`. | Initialize the overwrite decision only after selecting the destination, require explicit confirmation for existing destinations or source collisions, and pass one confirmed value to the core watermark API. | Resolved; rebuild implemented | Code review 2026-11-21 |
 | CRIT-017 | Required text, image, and annotation operation parameters are hard-coded instead of exposed through validated controls. | Users cannot control required positions, bounds, font, size, color, opacity, stroke width, or selected image rectangles. | `ui/main_window.py:155-286` used fixed rectangles and fixed coordinate/point lists for text, annotation, and image operations. | Add validated controls for applicable operation parameters and selected page/rectangle values; preserve fixed defaults only where the control explicitly chooses them. | Resolved; rebuild implemented | Code review 2026-11-21 |
+| CRIT-018 | The viewer unconditionally binds the unsupported Tk `<Drop>` event after attempting TkDND registration. | The standalone executable raises `bad event type or keysym "Drop"` during window construction and exits. | The screenshot traceback shows `ui/viewer.py:45` calling `master.bind("<Drop>", ...)` on the standard Windows Tk runtime. | Guard unsupported drop-event registration with `TclError` handling; retain file-picker opening and add an executable startup regression test. | Accepted resolution; implementation rebuild required | Requirements re-review passed 2026-11-22 |
+| CRIT-019 | Coordinate-based edit dialogs require users to infer PDF page coordinates without a visual selection mechanism. | Users cannot reliably choose text/image/annotation positions or freehand paths, making core editing controls inaccessible without PDF-coordinate knowledge. | The user reported difficulty with the “Text bounds” prompt; `ui/main_window.py` asks for rectangles and point lists, while `ui/viewer.py` has no page-selection interaction. | Replace typed rectangle/point entry with visible selection/drawing on the page preview and accurately map displayed positions to PDF page coordinates across zoom, scrolling, and page sizes; test cancellation and mapping. | Resolved; requirements-only correction accepted |
 
 CRIT-001 through CRIT-004 are requirements decisions whose resolutions passed
 requirements re-review on 2026-11-21. CRIT-005 and CRIT-006 are confirmed
@@ -289,6 +293,8 @@ was resolved by accepting `>=3.12,<3.16`.
 | CR-002 | Complete fixture acceptance evidence. | Section 5 fixture baseline; TEST-012; `fixtures/pdf/manifest.json`; `tests/integration/test_fixture_acceptance.py` | Manifest covers every required fixture category, per-fixture dialect/page/content/form metadata, operation outcomes, and SHA-256 hashes; text-only and malformed-AcroForm PDFs exist; integration tests verify the manifest and page counts. External-viewer validation is outside the initial scope. | CRIT-007, REC-009, FIND-025, FIND-026 | Resolved; requirements re-review passed |
 | CR-003 | Correct FIND-030 and FIND-031 requirements-only findings. | REQ-013, REQ-014, TEST-007, TEST-009, Section 7, REC-012, REC-013 | (1) Every destination-producing workflow requires explicit confirmation before replacing a destination or source. (2) PDF outputs use atomic temporary-file/replacement behavior and failed writes leave no partial success. (3) Selected watermark pages use one-based positive integers, reject malformed and out-of-bounds values with a named error, and affect no unselected pages. No application source or executable changes are authorized by this requirements-only correction. | FIND-030, FIND-031, REC-012, REC-013 | Requirements corrected; implementation rebuild required |
 | CR-004 | Fix the 2026-11-21 code-review findings for watermark runtime safety, configurable operation parameters, and merge overwrite confirmation. | REQ-005, REQ-006, REQ-009, REQ-013, REQ-014, TEST-003, TEST-004, TEST-007, TEST-009, `ui/main_window.py`; affected core APIs | (1) Text and image watermark workflows define and confirm overwrite state before output. (2) Text, image, and annotation controls expose and validate required parameters. (3) Merge uses exactly one explicit overwrite decision. (4) A runtime/UI test covers the corrected confirmation and parameter paths. | CRIT-016, CRIT-017, FIND-037, FIND-038, FIND-039, REC-015, REC-016, REC-017 | Implemented; code review required |
+| CR-005 | Fix executable startup crash caused by unsupported Tk drag-drop event binding. | REQ-001, TEST-010, TEST-013; `ui/viewer.py`; executable launch smoke test | (1) The packaged executable launches without an unhandled Tcl `bad event type or keysym "Drop"` exception. (2) An unsupported drop binding is handled safely and does not prevent application startup. (3) If native drag-and-drop is unavailable, file opening through the Open workflow remains unaffected. (4) A clean rebuild and launch smoke test complete before packaging is reauthorized. | FIND-048 | Resolved; rebuilt and smoke-tested |
+| CR-006 | Replace manual coordinate entry with direct visual selection on the rendered PDF page. | REQ-005, REQ-006, REQ-009, REQ-017; TEST-003, TEST-004, TEST-014; `ui/viewer.py`, `ui/main_window.py`, related unit/integration tests | (1) Text, comment, highlight, underline, shape, and image edit workflows let the user indicate positions/rectangles on the page preview instead of typing PDF coordinates. (2) Freehand annotations are drawn on the preview. (3) Conversion from viewport selection to PDF coordinates remains correct with zoom, scrolling, and differing page sizes. (4) Selection preview is visible and canceling does not create or alter output. (5) Coordinate-operation acceptance coverage and project checks pass. | CRIT-019, FIND-051, FIND-052 | Implemented; code review passed |
 
 ## 12. Review Findings and Resolution Log
 
@@ -341,10 +347,19 @@ was resolved by accepting `>=3.12,<3.16`.
 | FIND-045 | Code review | No Windows executable or clean-machine VM evidence is present for TEST-010 or TEST-013. The suite only verifies Python source behavior, and the build README remains packaging documentation rather than executed acceptance evidence. Re-review 2026-11-21: no executable or VM evidence was run or added. | TEST-010, TEST-013, Phase 5 | Perform clean Windows source/build checks and a clean-machine launch test, or explicitly record the unavailable checks as accepted limitations in the requirements. | Open; packaging blocked |
 | FIND-046 | Code review | Image extraction previously wrote each Pixmap directly to its final `.png` path and lacked an atomic replacement transaction. Rebuild 2026-11-21 changed it to temporary-file save plus `os.replace`, destination confirmation, and temporary cleanup on failure. | REQ-014, TEST-009 | Extract each image to a temporary file in the destination directory and atomically replace each final image only after a confirmed overwrite decision; remove temporary files on failure and add a failure-transaction test. | Resolved; rebuild implemented |
 | FIND-047 | Implementation rebuild | Text watermark runtime validation used a 45-degree rotation unsupported by PyMuPDF's `insert_text()` API. The first rebuild validation failed; the source was corrected to omit the unsupported rotation and rerun successfully. | REQ-013, TEST-007 | Use only supported PyMuPDF text insertion parameters and retain validated selected-page behavior. | Resolved; rebuild implemented |
+| FIND-048 | User-reported executable failure | The executable exits during startup because `ui/viewer.py:45` unconditionally binds `<Drop>`, and the Windows Tk runtime reports `bad event type or keysym "Drop"`. | REQ-001, TEST-010, TEST-013, CR-005 | Guard unsupported Tk drop-event registration and verify both source startup and the rebuilt executable launch without the crash. | Resolved; rebuild implemented; rebuilt executable passed an 8-second startup smoke test |
+| FIND-049 | User-reported usability change | The UI requires users to type page-space rectangles such as `72,72,400,110` and freehand points, but the page preview provides no visual coordinate-selection interaction. Users cannot be expected to infer PDF page coordinates from the dialog. | REQ-005, REQ-006, REQ-009, REQ-017, TEST-014, CR-006 | Add page-preview selection/drawing interactions and map viewport positions to PDF points, with visible selection feedback and cancellation that leaves the document unchanged. | Accepted change request; resolved in requirements |
+| FIND-050 | Requirements re-review | CR-006 and REQ-017 define visual selection/drawing, PDF-coordinate mapping, cancellation, and TEST-014 across zoom, scrolling, and page sizes. No unresolved critical specification decision remains; implementation and evidence are still rebuild/code-review concerns. | REQ-005, REQ-006, REQ-009, REQ-017, TEST-003, TEST-004, TEST-014, CR-006, CRIT-019 | Set Requirements review to `Passed`; retain implementation rebuild, code-review rebuild gate, and packaging authorization gate. | Accepted; requirements review passed |
+| FIND-051 | Code review | `canvas_point_to_pdf()` and `canvas_rect_to_pdf()` at `ui/viewer.py:8-30` map every canvas point by dividing by zoom. They do not account for PyMuPDF page rotation, CropBox/MediaBox offsets, or the page-to-pixmap transform. A runtime probe shows a 200x300-page rotated 90 degrees renders to a 600x400 pixmap at zoom 2 with a 300x200 page rectangle, so a scalar divide cannot reproduce the PDF transform for that page. | REQ-017, TEST-014 | Use PyMuPDF page/pixmap and rotation/crop transforms for viewport-to-PDF conversion, clamp selections to rendered page bounds, and add save/reopen acceptance tests for rotated pages and differing page boxes. | Resolved; rebuild implemented |
+| FIND-052 | Code review | `start_rect_selection()` and `start_freehand_selection()` retain callbacks and page-index state when zoom, page navigation, or re-render occurs; `set_zoom()`, previous/next, direct-page navigation, `go_to_index()`, and `render()` do not cancel active selection. `ui/viewer.py:208-235,264-274` | REQ-017, TEST-014 | Cancel and clear active selection before zooming, changing pages, or re-rendering; bind the operation to the page index at selection start and reject or cancel stale selections. | Resolved; rebuild implemented |
+| FIND-053 | Code review | The visual-selection tests at `tests/unit/test_rebuild_safety.py:215-222` verify scalar zoom mapping only. They do not exercise cancellation callbacks, Escape/right-click cancellation, page-index rebinding, rotation, CropBox offsets, scroll offsets, or save/reopen coordinate round trips. | REQ-017, TEST-014 | Add machine-verifiable selection and cancellation tests covering rotated pages, differing page sizes/boxes, zoom, canvas scroll offsets, and visible redraw; verify cancellation creates no output. | Resolved; rebuild verification complete |
+| FIND-054 | Code review | Re-review found no unresolved correctness or safety defects in the CR-006 rebuild. Rendered page geometry, clamping, and active-selection cancellation are implemented and the focused and full suites pass. | REQ-017, TEST-014, CR-006 | Preserve the rebuilt guards and coordinate/save/reopen coverage. | Resolved; code review passed |
 
 ## 13. Review and Build Gate
 
-- **Requirements review:** Passed. FIND-034, FIND-035, and FIND-040 are resolved by explicit
+- **Requirements review:** Passed. CR-006 visual page selection requirements are
+  reviewed and testable; `/build-script` remains a separate explicit gate.
+  FIND-034, FIND-035, and FIND-040 remain resolved by explicit
   requirements and acceptance corrections. Remaining `not-tested` fixture evidence
   and implementation rebuild items are not unresolved requirements decisions.
 - **Requirements review findings:** CRIT-012 through CRIT-015 are resolved in
@@ -360,12 +375,10 @@ was resolved by accepting `>=3.12,<3.16`.
   CRIT-017, FIND-037 through FIND-039, REC-015 through REC-017, and the
   associated implementation acceptance coverage was completed for FIND-041
   through FIND-043.
-- **Implementation:** Current. Password-aware open, text font/fit validation,
+- **Implementation:** Current for the CR-006 rebuild. Password-aware open, text font/fit validation,
   and signature-field handling were rebuilt and unit-tested.
-- **Code review:** Passed 2026-11-22. No actionable implementation defects
-  remain in the source review; source compilation and 24 pytest tests passed.
-- **Packaging:** Authorized. `/build-exe` may now validate the standalone
-  executable and clean-machine evidence required by TEST-010 and TEST-013.
+- **Code review:** Passed for the source rebuild.
+- **Packaging:** Complete. The one-file windowed executable was rebuilt and smoke-tested.
 - **Implementation record:** CR-004 rebuild implemented operation parameter controls,
   watermark overwrite safety, and merge overwrite confirmation. The rebuild added merge, split, reorder/delete,
   encryption/decryption, form, extraction, and text/image watermark workflows
@@ -377,20 +390,32 @@ was resolved by accepting `>=3.12,<3.16`.
   parameters and confirms watermark and merge overwrite decisions once.
 - **Test record:** `python -m compileall -q core ui pdf_editor.py tests` passed
   on 2026-11-22.
-  `python -m pytest tests/unit tests/integration` passed 24 tests on
-  2026-11-22, with one PyMuPDF
-  deprecation warning. Remaining limitation: executable clean-build and
+  The full command `python -m pytest tests/unit tests/integration`
+  passed 30 tests on 2026-11-22, with one PyMuPDF deprecation warning.
+  Targeted rebuild coverage passed 25 tests. The full suite passed 30 tests.
+  Remaining limitation: executable clean-build and
   manual clean-VM evidence are not available under TEST-010/TEST-013.
-  The source rebuild requires separate `/review-script` code review before packaging.
+  Packaging authorization permits `/build-exe`; clean-machine evidence remains a
+  packaging gate limitation to document by the packaging workflow.
 - **Rebuild implementation paths:** Destination overwrite guards and atomic
   save/replace behavior were rebuilt in `core/document.py`,
   `core/security.py`, `core/forms.py`, `core/images.py`, and
   `core/annotations.py`. Text extraction uses atomic export in
   `core/extraction.py`; affected UI workflows confirm existing destinations in
-  `ui/main_window.py`.
-- **Checks:** `python -m compileall -q core ui pdf_editor.py` passed.
-  `python -m pytest` passed with 20 tests and 1 PyMuPDF
-  deprecation warning on 2026-11-21. Windows clean-build and clean-machine
+  `ui/main_window.py`. CR-006 visual rectangle/freehand selection and
+  viewport-to-PDF coordinate mapping are implemented in `ui/viewer.py`;
+  text, comment, highlight, underline, shape, and image workflows no longer
+  require PDF-coordinate entry in `ui/main_window.py`.
+- **Packaging record:** PyInstaller 6.22.3 built
+  `dist/PDFEditor.exe` on 2026-11-22 using Python 3.15.2 and the existing
+  `pdf_editor.spec`. The archive contains `pdf_editor`, Tk/Tcl runtime data,
+  PyMuPDF binaries, the Python runtime, and `THIRD_PARTY_NOTICES.md`.
+  The executable remained running after an 8-second GUI startup smoke test.
+  SHA-256: `873B0E6CD6D771DE6BD72AC3A8CADB42FF2398A17C29017D7CFFB6B1395FB8F5`;
+  size: 31,618,898 bytes.
+- **Checks:** `python -m compileall -q core ui pdf_editor.py tests` passed.
+  `python -m pytest tests/unit tests/integration` passed with 30 tests and
+  1 PyMuPDF deprecation warning on 2026-11-22. Windows clean-build and clean-machine
   executable checks were not available in this review.
 
 ## 14. Assumptions and Decisions

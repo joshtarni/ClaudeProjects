@@ -246,17 +246,17 @@ class MainWindow(tk.Tk):
         except Exception as exc:
             show_error(self, "Operation failed", str(exc))
 
+    def _select_rect_for_operation(self, title: str, operation) -> None:
+        if not self.working:
+            show_error(self, "No document", "Open a PDF before editing.")
+            return
+        self.viewer.start_rect_selection(operation)
+
     def insert_text(self) -> None:
         text = simpledialog.askstring("Insert text", "Text:", parent=self)
         if not text:
             return
         try:
-            rect = parse_rect(simpledialog.askstring(
-                "Text bounds",
-                "Rectangle x0,y0,x1,y1:",
-                initialvalue="72,72,400,110",
-                parent=self,
-            ) or "")
             font_size = parse_float(simpledialog.askstring(
                 "Text size",
                 "Font size:",
@@ -281,50 +281,36 @@ class MainWindow(tk.Tk):
             show_error(self, "Invalid text parameters", str(exc))
             return
 
-        def operation(output: str, overwrite: bool = False) -> str:
-            return insert_text(
-                self.working, self.viewer.page_index, text, rect,
-                font_size=font_size,
-                color=color,
-                font_name=font_name,
-                output=output,
-                overwrite=overwrite,
-            )
+        def after_selection(rect: tuple[float, float, float, float]) -> None:
+            def selected_operation(output: str, overwrite: bool = False) -> str:
+                return insert_text(
+                    self.working, self.viewer.page_index, text, rect,
+                    font_size=font_size,
+                    color=color,
+                    font_name=font_name,
+                    output=output,
+                    overwrite=overwrite,
+                )
+            self._run_operation(selected_operation, "text")
 
-        self._run_operation(operation, "text")
+        self._select_rect_for_operation("Select text bounds", after_selection)
 
     def add_comment(self) -> None:
         text = simpledialog.askstring("Add comment", "Comment:", parent=self)
         author = simpledialog.askstring("Add comment", "Author:", parent=self) or ""
         if not text:
             return
-        try:
-            rect = parse_rect(simpledialog.askstring(
-                "Comment bounds",
-                "Rectangle x0,y0,x1,y1:",
-                initialvalue="72,72,180,110",
-                parent=self,
-            ) or "")
-        except ValueError as exc:
-            show_error(self, "Invalid comment parameters", str(exc))
-            return
-
-        def operation(output: str, overwrite: bool = False) -> str:
-            return add_text_annotation(
-                self.working, self.viewer.page_index, rect, text, author,
-                output=output, overwrite=overwrite,
-            )
-
-        self._run_operation(operation, "comment")
+        def after_selection(rect: tuple[float, float, float, float]) -> None:
+            def operation(output: str, overwrite: bool = False) -> str:
+                return add_text_annotation(
+                    self.working, self.viewer.page_index, rect, text, author,
+                    output=output, overwrite=overwrite,
+                )
+            self._run_operation(operation, "comment")
+        self._select_rect_for_operation("Select comment bounds", after_selection)
 
     def add_highlight(self) -> None:
         try:
-            quads = parse_quads(simpledialog.askstring(
-                "Highlight regions",
-                "Rectangles x0,y0,x1,y1 separated by semicolons:",
-                initialvalue="72,72,180,110",
-                parent=self,
-            ) or "")
             author = simpledialog.askstring("Highlight", "Author:", parent=self) or ""
             color = parse_color(simpledialog.askstring(
                 "Highlight color", "RGB components 0-1:", initialvalue="1,1,0", parent=self,
@@ -338,22 +324,17 @@ class MainWindow(tk.Tk):
             show_error(self, "Invalid highlight parameters", str(exc))
             return
 
-        def operation(output: str, overwrite: bool = False) -> str:
-            return add_highlight_annotation(
-                self.working, self.viewer.page_index, quads, author,
-                color=color, opacity=opacity, output=output, overwrite=overwrite,
-            )
-
-        self._run_operation(operation, "highlight")
+        def after_selection(rect: tuple[float, float, float, float]) -> None:
+            def operation(output: str, overwrite: bool = False) -> str:
+                return add_highlight_annotation(
+                    self.working, self.viewer.page_index, [rect], author,
+                    color=color, opacity=opacity, output=output, overwrite=overwrite,
+                )
+            self._run_operation(operation, "highlight")
+        self._select_rect_for_operation("Select highlight region", after_selection)
 
     def add_underline(self) -> None:
         try:
-            quads = parse_quads(simpledialog.askstring(
-                "Underline regions",
-                "Rectangles x0,y0,x1,y1 separated by semicolons:",
-                initialvalue="72,72,180,110",
-                parent=self,
-            ) or "")
             author = simpledialog.askstring("Underline", "Author:", parent=self) or ""
             color = parse_color(simpledialog.askstring(
                 "Underline color", "RGB components 0-1:", initialvalue="0,0,1", parent=self,
@@ -367,19 +348,17 @@ class MainWindow(tk.Tk):
             show_error(self, "Invalid underline parameters", str(exc))
             return
 
-        def operation(output: str, overwrite: bool = False) -> str:
-            return add_underline_annotation(
-                self.working, self.viewer.page_index, quads, author,
-                color=color, opacity=opacity, output=output, overwrite=overwrite,
-            )
-
-        self._run_operation(operation, "underline")
+        def after_selection(rect: tuple[float, float, float, float]) -> None:
+            def operation(output: str, overwrite: bool = False) -> str:
+                return add_underline_annotation(
+                    self.working, self.viewer.page_index, [rect], author,
+                    color=color, opacity=opacity, output=output, overwrite=overwrite,
+                )
+            self._run_operation(operation, "underline")
+        self._select_rect_for_operation("Select underline region", after_selection)
 
     def add_shape(self) -> None:
         try:
-            rect = parse_rect(simpledialog.askstring(
-                "Shape bounds", "Rectangle x0,y0,x1,y1:", initialvalue="72,72,180,110", parent=self,
-            ) or "")
             author = simpledialog.askstring("Shape", "Author:", parent=self) or ""
             color = parse_color(simpledialog.askstring(
                 "Shape color", "RGB components 0-1:", initialvalue="1,0,0", parent=self,
@@ -391,22 +370,17 @@ class MainWindow(tk.Tk):
             show_error(self, "Invalid shape parameters", str(exc))
             return
 
-        def operation(output: str, overwrite: bool = False) -> str:
-            return add_shape_annotation(
-                self.working, self.viewer.page_index, rect, author,
-                color=color, width=width, output=output, overwrite=overwrite,
-            )
-
-        self._run_operation(operation, "shape")
+        def after_selection(rect: tuple[float, float, float, float]) -> None:
+            def operation(output: str, overwrite: bool = False) -> str:
+                return add_shape_annotation(
+                    self.working, self.viewer.page_index, rect, author,
+                    color=color, width=width, output=output, overwrite=overwrite,
+                )
+            self._run_operation(operation, "shape")
+        self._select_rect_for_operation("Select shape bounds", after_selection)
 
     def add_freehand(self) -> None:
         try:
-            points = parse_points(simpledialog.askstring(
-                "Freehand points",
-                "Points x,y separated by semicolons:",
-                initialvalue="72,72;100,100;128,72",
-                parent=self,
-            ) or "")
             author = simpledialog.askstring("Freehand", "Author:", parent=self) or ""
             color = parse_color(simpledialog.askstring(
                 "Freehand color", "RGB components 0-1:", initialvalue="1,0,0", parent=self,
@@ -418,13 +392,17 @@ class MainWindow(tk.Tk):
             show_error(self, "Invalid freehand parameters", str(exc))
             return
 
-        def operation(output: str, overwrite: bool = False) -> str:
-            return add_freehand_annotation(
-                self.working, self.viewer.page_index, points, author,
-                color=color, width=width, output=output, overwrite=overwrite,
-            )
-
-        self._run_operation(operation, "freehand")
+        def after_selection(points: list[tuple[float, float]]) -> None:
+            def operation(output: str, overwrite: bool = False) -> str:
+                return add_freehand_annotation(
+                    self.working, self.viewer.page_index, points, author,
+                    color=color, width=width, output=output, overwrite=overwrite,
+                )
+            self._run_operation(operation, "freehand")
+        if not self.working:
+            show_error(self, "No document", "Open a PDF before editing.")
+            return
+        self.viewer.start_freehand_selection(after_selection)
 
     def insert_image(self) -> None:
         image_path = filedialog.askopenfilename(
@@ -433,29 +411,19 @@ class MainWindow(tk.Tk):
         )
         if not image_path:
             return
-        try:
-            rect = parse_rect(simpledialog.askstring(
-                "Image bounds",
-                "Target rectangle x0,y0,x1,y1:",
-                initialvalue="72,72,180,180",
-                parent=self,
-            ) or "")
-        except ValueError as exc:
-            show_error(self, "Invalid image parameters", str(exc))
-            return
-
-        def operation(output: str, overwrite: bool = False) -> str:
-            insert_image(
-                self.working,
-                output,
-                self.viewer.page_index,
-                image_path,
-                rect,
-                overwrite=overwrite,
-            )
-            return output
-
-        self._run_operation(operation, "image")
+        def after_selection(rect: tuple[float, float, float, float]) -> None:
+            def operation(output: str, overwrite: bool = False) -> str:
+                insert_image(
+                    self.working,
+                    output,
+                    self.viewer.page_index,
+                    image_path,
+                    rect,
+                    overwrite=overwrite,
+                )
+                return output
+            self._run_operation(operation, "image")
+        self._select_rect_for_operation("Select image bounds", after_selection)
 
     def replace_image(self) -> None:
         image_path = filedialog.askopenfilename(
@@ -464,53 +432,33 @@ class MainWindow(tk.Tk):
         )
         if not image_path:
             return
-        try:
-            rect = parse_rect(simpledialog.askstring(
-                "Replacement bounds",
-                "Target rectangle x0,y0,x1,y1:",
-                initialvalue="72,72,180,180",
-                parent=self,
-            ) or "")
-        except ValueError as exc:
-            show_error(self, "Invalid image parameters", str(exc))
-            return
-
-        def operation(output: str, overwrite: bool = False) -> str:
-            replace_image(
-                self.working,
-                output,
-                self.viewer.page_index,
-                rect,
-                image_path,
-                overwrite=overwrite,
-            )
-            return output
-
-        self._run_operation(operation, "replace")
+        def after_selection(rect: tuple[float, float, float, float]) -> None:
+            def operation(output: str, overwrite: bool = False) -> str:
+                replace_image(
+                    self.working,
+                    output,
+                    self.viewer.page_index,
+                    rect,
+                    image_path,
+                    overwrite=overwrite,
+                )
+                return output
+            self._run_operation(operation, "replace")
+        self._select_rect_for_operation("Select replacement bounds", after_selection)
 
     def remove_image(self) -> None:
-        try:
-            rect = parse_rect(simpledialog.askstring(
-                "Image removal bounds",
-                "Target rectangle x0,y0,x1,y1:",
-                initialvalue="72,72,180,180",
-                parent=self,
-            ) or "")
-        except ValueError as exc:
-            show_error(self, "Invalid image parameters", str(exc))
-            return
-
-        def operation(output: str, overwrite: bool = False) -> str:
-            remove_image_rect(
-                self.working,
-                output,
-                self.viewer.page_index,
-                rect,
-                overwrite=overwrite,
-            )
-            return output
-
-        self._run_operation(operation, "remove-image")
+        def after_selection(rect: tuple[float, float, float, float]) -> None:
+            def operation(output: str, overwrite: bool = False) -> str:
+                remove_image_rect(
+                    self.working,
+                    output,
+                    self.viewer.page_index,
+                    rect,
+                    overwrite=overwrite,
+                )
+                return output
+            self._run_operation(operation, "remove-image")
+        self._select_rect_for_operation("Select image removal bounds", after_selection)
 
     def rotate_page(self) -> None:
         def operation(output: str, overwrite: bool = False) -> str:
