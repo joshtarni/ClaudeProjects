@@ -1,0 +1,4 @@
+imageio-ffmpeg
+mss
+numpy
+soundcard
