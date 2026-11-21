@@ -1,0 +1,7 @@
+PyMuPDF==1.26.6
+
+[build]
+pyinstaller<7,>=6.16
+
+[test]
+pytest<9,>=8.3

@@ -1,0 +1,12 @@
+pyproject.toml
+core/__init__.py
+core/annotations.py
+core/document.py
+core/extraction.py
+core/forms.py
+core/security.py
+pdf_editor.egg-info/PKG-INFO
+pdf_editor.egg-info/SOURCES.txt
+pdf_editor.egg-info/dependency_links.txt
+pdf_editor.egg-info/requires.txt
+pdf_editor.egg-info/top_level.txt
