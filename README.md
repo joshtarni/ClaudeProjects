@@ -25,4 +25,12 @@ Start, Pause/Resume, and Stop. By default these are `Ctrl+Shift+F8`,
 `Ctrl+Shift+F9`, and `Ctrl+Shift+F10`; settings are saved in the current
 Windows user's application data folder.
 
+## Optimize a video
+
+Open the **Optimize Video** tab, browse to a video, then choose a compression
+profile and maximum resolution. The app displays an approximate output size and
+saves the converted MP4 next to the original as `<name>_optimized.mp4`. The
+original is left untouched; if an optimized file with that name already exists,
+the app asks before replacing it.
+
 For implementation notes and development history, see [EXPERIENCE.md](EXPERIENCE.md).

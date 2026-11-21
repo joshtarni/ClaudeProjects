@@ -1,7 +1,7 @@
 ---
 name: commit-push
 description: "Review pending Git changes, create a commit with a short, clean message, and push it to the current branch. Use when asked to commit and push workspace changes."
-argument-hint: "Optionally provide a short commit message or specify which changes to include"
+argument-hint: "Optionally provide a short commit message or name files to commit"
 ---
 
 # Commit and Push
@@ -13,18 +13,24 @@ message, and push the commit to its current remote branch.
 
 1. Inspect the repository root, current branch, upstream, worktree status, and
    staged and unstaged diffs. Review untracked file names and contents before
-   staging them. Never assume all changes belong to this task.
-2. Identify the changes the user intends to publish:
-   - Include the current task's related changes.
-   - Keep unrelated pre-existing changes out of the commit.
-   - If ownership or intent is unclear, changes contain sensitive material, or
-     a coherent commit cannot be safely selected, ask the user before staging.
+   staging them.
+2. By default, include **all pending, non-ignored repository changes**:
+   staged, unstaged, and untracked files. Do not omit changes just because they
+   predate the current request or seem unrelated. Narrow the scope only when
+   the user explicitly names files or asks to exclude changes.
+   - Do not include secrets, credentials, or clearly sensitive personal data.
+     If any are present or a file's contents cannot be safely assessed, stop and
+     ask the user what to do.
+   - Exclude transient caches and temporary build output that should not be
+     committed; do not exclude an existing or updated deliverable (including a
+     generated binary) merely because it was generated.
    - Do not discard, reset, amend, or stash changes as a shortcut.
 3. Run relevant, available targeted checks for the selected changes. If a check
    fails, investigate and report it; do not silently claim success. Do not
    commit generated artifacts unless they are part of the requested work.
-4. Stage only the intended paths. Review the staged diff and check for secrets,
-   unrelated edits, generated clutter, and whitespace errors before committing.
+4. Stage the full pending change set unless the user explicitly narrowed it.
+   Review the staged diff and check for secrets, unrelated edits, generated
+   clutter, and whitespace errors before committing.
 5. Create one commit with a concise, accurate subject: normally an imperative
    phrase of about 3-7 words, with no trailing period. Prefer a user-provided
    message when it accurately describes the changes. Follow any applicable

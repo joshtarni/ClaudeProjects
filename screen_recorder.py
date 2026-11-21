@@ -108,7 +108,7 @@ class ScreenRecorder:
     def __init__(self, root):
         self.root = root
         self.root.title("Screen Area Recorder")
-        self.root.geometry("390x335")
+        self.root.geometry("600x500")
         self.root.resizable(False, False)
         self.root.configure(bg="#0b1120")
         self._configure_theme()
@@ -156,14 +156,19 @@ class ScreenRecorder:
         self._stop_event = threading.Event()
         self._resume_event = threading.Event()
         self._messages = queue.Queue()
+        self._optimizer_messages = queue.Queue()
         self._worker = None
+        self._optimizer_worker = None
         self._temporary_path = None
         self._audio_temporary_path = None
+        self._optimizer_path = None
+        self._optimizer_metadata = None
 
         self.status = tk.StringVar(value="Ready")
         self._build_controls()
         self.root.protocol("WM_DELETE_WINDOW", self.close)
         self.root.after(200, self._check_worker_messages)
+        self.root.after(200, self._check_optimizer_messages)
         self.root.after(50, self._check_hotkeys)
         if self._hotkey_load_error:
             self.root.after(
@@ -236,19 +241,38 @@ class ScreenRecorder:
             background=[("disabled", "#1a2434"), ("active", "#35465f")],
             foreground=[("disabled", "#64748b"), ("active", "#ffffff")],
         )
+        style.configure("App.TNotebook", background="#0b1120", borderwidth=0)
+        style.configure(
+            "App.TNotebook.Tab",
+            background="#151e2f",
+            foreground="#94a3b8",
+            padding=(16, 8),
+        )
+        style.map(
+            "App.TNotebook.Tab",
+            background=[("selected", "#263449")],
+            foreground=[("selected", "#f1f5f9")],
+        )
 
     def _build_controls(self):
         shell = ttk.Frame(self.root, style="App.TFrame", padding=(24, 20, 24, 18))
         shell.pack(fill="both", expand=True)
 
-        ttk.Label(shell, text="Screen Recorder", style="Title.TLabel").pack(anchor="w")
+        notebook = ttk.Notebook(shell, style="App.TNotebook")
+        notebook.pack(fill="both", expand=True)
+        recorder_tab = ttk.Frame(notebook, style="App.TFrame", padding=(12, 12, 12, 8))
+        optimizer_tab = ttk.Frame(notebook, style="App.TFrame", padding=(12, 12, 12, 8))
+        notebook.add(recorder_tab, text="Screen Recorder")
+        notebook.add(optimizer_tab, text="Optimize Video")
+
+        ttk.Label(recorder_tab, text="Screen Recorder", style="Title.TLabel").pack(anchor="w")
         ttk.Label(
-            shell,
+            recorder_tab,
             text="Capture just the part of your screen you need.",
             style="Subtitle.TLabel",
         ).pack(anchor="w", pady=(2, 16))
 
-        card = ttk.Frame(shell, style="Card.TFrame", padding=(16, 13))
+        card = ttk.Frame(recorder_tab, style="Card.TFrame", padding=(16, 13))
         card.pack(fill="x")
         ttk.Label(card, text="CAPTURE AREA", style="CardTitle.TLabel").pack(anchor="w")
         ttk.Label(
@@ -275,7 +299,7 @@ class ScreenRecorder:
             side="left", fill="x", expand=True
         )
 
-        controls = ttk.Frame(shell, style="App.TFrame")
+        controls = ttk.Frame(recorder_tab, style="App.TFrame")
         controls.pack(fill="x", pady=(15, 0))
         self.start_button = ttk.Button(
             controls,
@@ -302,11 +326,335 @@ class ScreenRecorder:
         self.stop_button.pack(side="left", fill="x", expand=True, padx=(6, 0))
 
         ttk.Button(
-            shell,
+            recorder_tab,
             text="Set up hotkeys…",
             style="Secondary.TButton",
             command=self.open_hotkey_settings,
         ).pack(fill="x", pady=(10, 0))
+
+        self._build_optimizer_tab(optimizer_tab)
+
+    def _build_optimizer_tab(self, parent):
+        ttk.Label(parent, text="Optimize Video", style="Title.TLabel").pack(anchor="w")
+        ttk.Label(
+            parent,
+            text="Compress a video and save an optimized MP4 beside the original.",
+            style="Subtitle.TLabel",
+            wraplength=500,
+        ).pack(anchor="w", pady=(2, 16))
+
+        card = ttk.Frame(parent, style="Card.TFrame", padding=(16, 14))
+        card.pack(fill="both", expand=True)
+
+        ttk.Label(card, text="VIDEO FILE", style="CardTitle.TLabel").pack(anchor="w")
+        file_row = ttk.Frame(card, style="Card.TFrame")
+        file_row.pack(fill="x", pady=(7, 0))
+        self.optimizer_path = tk.StringVar()
+        self.optimizer_path_entry = ttk.Entry(
+            file_row,
+            textvariable=self.optimizer_path,
+            state="readonly",
+        )
+        self.optimizer_path_entry.pack(side="left", fill="x", expand=True)
+        self.optimizer_browse_button = ttk.Button(
+            file_row,
+            text="Browse…",
+            style="Secondary.TButton",
+            command=self._browse_video,
+        )
+        self.optimizer_browse_button.pack(side="left", padx=(8, 0))
+
+        options = ttk.Frame(card, style="Card.TFrame")
+        options.pack(fill="x", pady=(16, 0))
+        options.columnconfigure(0, weight=1)
+        options.columnconfigure(1, weight=1)
+
+        ttk.Label(options, text="Compression", style="CardText.TLabel").grid(
+            row=0, column=0, sticky="w"
+        )
+        ttk.Label(options, text="Maximum resolution", style="CardText.TLabel").grid(
+            row=0, column=1, sticky="w", padx=(12, 0)
+        )
+        self.optimizer_profile = tk.StringVar(value="Balanced")
+        self.optimizer_resolution = tk.StringVar(value="Original")
+        self.optimizer_profile_box = ttk.Combobox(
+            options,
+            textvariable=self.optimizer_profile,
+            values=("Smaller file (700 kb/s)", "Balanced (1,500 kb/s)", "Higher quality (2,500 kb/s)"),
+            state="readonly",
+        )
+        self.optimizer_profile_box.current(1)
+        self.optimizer_profile_box.grid(row=1, column=0, sticky="ew", pady=(5, 0))
+        self.optimizer_resolution_box = ttk.Combobox(
+            options,
+            textvariable=self.optimizer_resolution,
+            values=("Original", "1080p", "720p", "480p"),
+            state="readonly",
+        )
+        self.optimizer_resolution_box.grid(
+            row=1, column=1, sticky="ew", padx=(12, 0), pady=(5, 0)
+        )
+        self.optimizer_profile_box.bind(
+            "<<ComboboxSelected>>", self._update_optimizer_estimate
+        )
+        self.optimizer_resolution_box.bind(
+            "<<ComboboxSelected>>", self._update_optimizer_estimate
+        )
+
+        self.optimizer_estimate = tk.StringVar(
+            value="Select a video to see its duration and estimated output size."
+        )
+        ttk.Label(
+            card,
+            textvariable=self.optimizer_estimate,
+            style="CardText.TLabel",
+            wraplength=490,
+            justify="left",
+        ).pack(anchor="w", pady=(16, 6))
+        ttk.Label(
+            card,
+            text="Estimate is approximate; already-compressed videos may not get smaller.",
+            style="CardText.TLabel",
+            wraplength=490,
+        ).pack(anchor="w")
+
+        self.optimizer_convert_button = ttk.Button(
+            parent,
+            text="Convert video",
+            style="Primary.TButton",
+            command=self._start_optimization,
+            state="disabled",
+        )
+        self.optimizer_convert_button.pack(fill="x", pady=(12, 0))
+        self.optimizer_controls = (
+            self.optimizer_browse_button,
+            self.optimizer_profile_box,
+            self.optimizer_resolution_box,
+            self.optimizer_convert_button,
+        )
+
+    def _browse_video(self):
+        path = filedialog.askopenfilename(
+            parent=self.root,
+            title="Select a video to optimize",
+            filetypes=[
+                ("Video files", "*.mp4 *.mov *.mkv *.avi *.webm *.m4v *.wmv"),
+                ("All files", "*.*"),
+            ],
+        )
+        if not path:
+            return
+
+        self.optimizer_path.set(path)
+        self._optimizer_metadata = None
+        self.optimizer_convert_button.config(state="disabled")
+        try:
+            frames = imageio_ffmpeg.read_frames(path)
+            try:
+                metadata = next(frames)
+            finally:
+                frames.close()
+
+            duration = metadata.get("duration")
+            dimensions = metadata.get("source_size") or metadata.get("size")
+            if (
+                not isinstance(duration, (int, float))
+                or duration <= 0
+                or not dimensions
+                or len(dimensions) != 2
+                or dimensions[0] <= 0
+                or dimensions[1] <= 0
+            ):
+                raise ValueError("The selected file does not contain readable video metadata.")
+            self._optimizer_metadata = metadata
+            self.optimizer_convert_button.config(state="normal")
+            self._update_optimizer_estimate()
+        except (OSError, RuntimeError, StopIteration, ValueError) as error:
+            self.optimizer_estimate.set(f"Could not read video metadata: {error}")
+            messagebox.showerror(
+                "Could not read video",
+                f"The selected file could not be opened as a video.\n\n{error}",
+                parent=self.root,
+            )
+
+    def _update_optimizer_estimate(self, _event=None):
+        if self._optimizer_metadata is None:
+            return
+
+        duration = self._optimizer_metadata["duration"]
+        dimensions = self._optimizer_metadata.get("source_size") or self._optimizer_metadata["size"]
+        profile_bitrates = {
+            "Smaller file (700 kb/s)": 700,
+            "Balanced (1,500 kb/s)": 1500,
+            "Higher quality (2,500 kb/s)": 2500,
+        }
+        video_bitrate = profile_bitrates[self.optimizer_profile.get()]
+        estimated_bytes = int(
+            duration * (video_bitrate + 128) * 1000 / 8 * 1.06
+        )
+        source_size = os.path.getsize(self.optimizer_path.get())
+        self.optimizer_estimate.set(
+            f"Video: {dimensions[0]}×{dimensions[1]}, {self._format_duration(duration)}"
+            f"  •  Current size: {self._format_size(source_size)}\n"
+            f"Estimated optimized size: about {self._format_size(estimated_bytes)}"
+        )
+
+    def _start_optimization(self):
+        source_path = self.optimizer_path.get()
+        if not source_path or self._optimizer_metadata is None:
+            return
+        if not os.path.isfile(source_path):
+            messagebox.showerror(
+                "Video not found",
+                "The selected video no longer exists. Please browse for it again.",
+                parent=self.root,
+            )
+            return
+
+        destination = os.path.splitext(source_path)[0] + "_optimized.mp4"
+        if os.path.exists(destination) and not messagebox.askyesno(
+            "Replace optimized video?",
+            f"{destination} already exists. Replace it after conversion completes?",
+            parent=self.root,
+        ):
+            return
+
+        profile_bitrates = {
+            "Smaller file (700 kb/s)": 700,
+            "Balanced (1,500 kb/s)": 1500,
+            "Higher quality (2,500 kb/s)": 2500,
+        }
+        resolution_heights = {"Original": None, "1080p": 1080, "720p": 720, "480p": 480}
+        video_bitrate = profile_bitrates[self.optimizer_profile.get()]
+        max_height = resolution_heights[self.optimizer_resolution.get()]
+        for control in self.optimizer_controls:
+            control.config(state="disabled")
+        self.optimizer_estimate.set("Converting video…")
+        self._optimizer_worker = threading.Thread(
+            target=self._optimize_video,
+            args=(source_path, destination, video_bitrate, max_height),
+            daemon=True,
+        )
+        self._optimizer_worker.start()
+
+    def _optimize_video(self, source_path, destination, video_bitrate, max_height):
+        temporary_path = None
+        try:
+            dimensions = (
+                self._optimizer_metadata.get("source_size")
+                or self._optimizer_metadata["size"]
+            )
+            source_width, source_height = dimensions
+            scale = 1.0
+            if max_height is not None:
+                max_width = int(max_height * 16 / 9)
+                scale = min(scale, max_height / source_height, max_width / source_width)
+            output_width = max(2, int(source_width * scale) // 2 * 2)
+            output_height = max(2, int(source_height * scale) // 2 * 2)
+
+            descriptor, temporary_path = tempfile.mkstemp(
+                prefix=".video-optimized-",
+                suffix=".mp4",
+                dir=os.path.dirname(os.path.abspath(destination)),
+            )
+            os.close(descriptor)
+            command = [
+                imageio_ffmpeg.get_ffmpeg_exe(),
+                "-y",
+                "-hide_banner",
+                "-loglevel",
+                "error",
+                "-i",
+                source_path,
+                "-map",
+                "0:v:0",
+                "-map",
+                "0:a?",
+                "-vf",
+                f"scale={output_width}:{output_height}",
+                "-c:v",
+                "libx264",
+                "-preset",
+                "medium",
+                "-b:v",
+                f"{video_bitrate}k",
+                "-maxrate",
+                f"{video_bitrate}k",
+                "-bufsize",
+                f"{video_bitrate * 2}k",
+                "-pix_fmt",
+                "yuv420p",
+                "-c:a",
+                "aac",
+                "-b:a",
+                "128k",
+                "-movflags",
+                "+faststart",
+                temporary_path,
+            ]
+            result = subprocess.run(command, capture_output=True, text=True)
+            if result.returncode:
+                raise RuntimeError(
+                    result.stderr.strip()
+                    or f"FFmpeg exited with code {result.returncode}."
+                )
+            if not os.path.exists(temporary_path) or os.path.getsize(temporary_path) == 0:
+                raise RuntimeError("FFmpeg completed without producing an output video.")
+            os.replace(temporary_path, destination)
+            temporary_path = None
+            self._optimizer_messages.put(("done", destination))
+        except Exception as error:
+            self._optimizer_messages.put(("error", str(error)))
+        finally:
+            if temporary_path and os.path.exists(temporary_path):
+                os.remove(temporary_path)
+
+    def _check_optimizer_messages(self):
+        try:
+            while True:
+                kind, detail = self._optimizer_messages.get_nowait()
+                for control in self.optimizer_controls:
+                    control.config(state="normal")
+                if kind == "done":
+                    self.optimizer_path.set(detail)
+                    self._optimizer_metadata = None
+                    self.optimizer_convert_button.config(state="disabled")
+                    self.optimizer_estimate.set(f"Finished: {detail}")
+                    messagebox.showinfo(
+                        "Video optimized",
+                        f"The optimized video was saved here:\n{detail}",
+                        parent=self.root,
+                    )
+                else:
+                    self.optimizer_convert_button.config(
+                        state="normal" if self._optimizer_metadata else "disabled"
+                    )
+                    self._update_optimizer_estimate()
+                    messagebox.showerror(
+                        "Video optimization failed",
+                        detail,
+                        parent=self.root,
+                    )
+        except queue.Empty:
+            pass
+        self.root.after(200, self._check_optimizer_messages)
+
+    @staticmethod
+    def _format_duration(seconds):
+        total_seconds = int(seconds)
+        hours, remainder = divmod(total_seconds, 3600)
+        minutes, seconds = divmod(remainder, 60)
+        if hours:
+            return f"{hours}:{minutes:02d}:{seconds:02d}"
+        return f"{minutes}:{seconds:02d}"
+
+    @staticmethod
+    def _format_size(size):
+        value = float(size)
+        for unit in ("B", "KB", "MB", "GB", "TB"):
+            if value < 1024 or unit == "TB":
+                return f"{value:.1f} {unit}"
+            value /= 1024
 
     def _set_status(self, text, recording=False):
         self.status.set(text)
