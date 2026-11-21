@@ -16,7 +16,7 @@ Use these status values consistently:
   `Rebuild required`, `Ready to package`, or `Packaged`.
 - Requirements review: `Not reviewed`, `In progress`, `Passed`, or `Failed`.
 - Implementation: `Not started`, `Authorized`, `In progress`,
-  `Rebuild required`, or `Current`.
+  `Existing; review required`, `Rebuild required`, or `Current`.
 - Code review: `Not reviewed`, `In progress`, `Passed`, or `Failed`.
 - Packaging: `Not authorized`, `Authorized`, or `Complete`.
 
@@ -25,6 +25,10 @@ approvals as described below. A passing requirements review does not itself
 authorize implementation; an explicit user request to run `/build-script` is
 required. A passing code review authorizes packaging but does not run
 `/build-exe` automatically.
+
+For a pre-existing project adopted into this workflow, use
+`Implementation: Existing; review required` until its requirements review and
+code review pass. Do not claim existing code is current merely because it runs.
 
 ## 1. Purpose
 

@@ -1,36 +1,27 @@
-# Screen Area Recorder
+# ClaudeProjects
 
-A small Python desktop recorder for Windows. Move the transparent outlined box
-over the part of the screen you want to capture, resize it with the lower-right
-handle, and use **Start recording**. While recording, a temporary MP4 is stored
-in the same folder as the script. After you click **Stop** and the video is
-finalized, choose where to save it and what to name it. Canceling the save
-dialog deletes the temporary video. The recorder captures audio from the
-default Windows audio output and includes it in the MP4. H.264 video and AAC
-audio compression keep file sizes modest.
+This repository contains agent workflow skills and script projects.
 
-## Run
+## Screen Area Recorder
 
-Install Python 3.9 or later, then from this folder run:
+The existing Windows screen-area recorder is maintained in
+[projects/screen-recorder/](projects/screen-recorder/). Its behavior and review
+gates are captured in
+[requirements.md](projects/screen-recorder/requirements.md).
+
+From the repository root, install its dependencies and run the Python app:
 
 ```powershell
-py -m pip install -r requirements.txt
-py screen_recorder.py
+py -m pip install -r projects\screen-recorder\requirements.txt
+py projects\screen-recorder\screen_recorder.py
 ```
 
-Use **Pause** and **Resume** to omit pauses from the recording. The capture area
-is fixed while recording and cannot be moved; the outline returns after the
-recording is finalized. Use **Set up hotkeys…** to assign global shortcuts for
-Start, Pause/Resume, and Stop. By default these are `Ctrl+Shift+F8`,
-`Ctrl+Shift+F9`, and `Ctrl+Shift+F10`; settings are saved in the current
-Windows user's application data folder.
+The standalone Windows executable is
+[ScreenRecorder.exe](projects/screen-recorder/dist/ScreenRecorder.exe). Use
+`/build-exe` to regenerate it after the project's requirements and code reviews
+pass.
 
-## Optimize a video
-
-Open the **Optimize Video** tab, browse to a video, then choose a compression
-profile and maximum resolution. The app displays an approximate output size and
-saves the converted MP4 next to the original as `<name>_optimized.mp4`. The
-original is left untouched; if an optimized file with that name already exists,
-the app asks before replacing it.
-
-For implementation notes and development history, see [EXPERIENCE.md](EXPERIENCE.md).
+See [the project log](projects/screen-recorder/EXPERIENCE.md) for prior
+implementation notes and verification history. See
+[.github/copilot-instructions.md](.github/copilot-instructions.md) for the
+repository's agent workflow.

@@ -27,6 +27,10 @@ It does not package an executable; `/build-exe` is a separate final step.
    - The user's prompt explicitly requests implementation from this
      requirements document. Merely invoking `/new-script`, `/change-script`,
      or `/review`, or asking to prepare/revise the plan, is not authorization.
+   - For an adopted legacy project whose implementation status is
+     `Existing; review required`, requirements review and code review must
+     first pass before a requested change/rebuild can proceed. Preserve its
+     behavior outside the approved Change Requests.
 4. If a precondition fails, do not edit application source. Explain the failed
    gate and direct the user to `/review` or the missing decision.
 

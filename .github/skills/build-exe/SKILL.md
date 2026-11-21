@@ -27,17 +27,26 @@ For managed script projects, also require `Packaging: Authorized` in
 and overall Status to `Packaged`. Do not mark packaging complete if the build
 or its required verification fails.
 
-## This Repository
+## Screen Area Recorder in This Repository
 
-For this project, the default entry point is `screen_recorder.py` and the
-expected output is `dist\ScreenRecorder.exe`. Unless the user specifies
+The adopted Screen Area Recorder project is under
+`projects\screen-recorder`. Its default entry point is
+`projects\screen-recorder\screen_recorder.py` and the expected output is
+`projects\screen-recorder\dist\ScreenRecorder.exe`. Unless the user specifies
 otherwise, build this Windows GUI app as a PyInstaller one-file executable,
-including `imageio-ffmpeg` resources and its FFmpeg binary:
+including `imageio-ffmpeg` resources and its FFmpeg binary. Run the command
+from the repository root:
 
 ```powershell
-py -m PyInstaller --noconfirm --clean --onefile --windowed `
-  --name ScreenRecorder --distpath dist --workpath build --specpath build `
-  --collect-all imageio_ffmpeg screen_recorder.py
+Push-Location projects\screen-recorder
+try {
+    py -m PyInstaller --noconfirm --clean --onefile --windowed `
+      --name ScreenRecorder --distpath dist --workpath build\work `
+      --specpath build\spec --collect-all imageio_ffmpeg screen_recorder.py
+    if ($LASTEXITCODE -ne 0) { throw "PyInstaller failed with exit code $LASTEXITCODE." }
+} finally {
+    Pop-Location
+}
 ```
 
 Use the current source, including uncommitted changes. If this repository's
@@ -73,7 +82,7 @@ conventions and adapt the build accordingly.
 
    ```powershell
    py -m PyInstaller --noconfirm --clean --onefile --windowed `
-     --name MyApp --distpath dist --workpath build --specpath build `
+     --name MyApp --distpath dist --workpath build\work --specpath build\spec `
      --collect-all imageio_ffmpeg main.py
    ```
 

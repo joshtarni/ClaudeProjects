@@ -16,12 +16,12 @@
 
 ## Dependencies and run command
 
-Dependencies are in `requirements.txt`: `imageio-ffmpeg`, `mss`, `numpy`, and
-`soundcard`. Install and run from the project directory:
+Dependencies are in this project's `requirements.txt`: `imageio-ffmpeg`,
+`mss`, `numpy`, and `soundcard`. From the repository root, install and run:
 
 ```powershell
-py -m pip install -r requirements.txt
-py screen_recorder.py
+py -m pip install -r projects\screen-recorder\requirements.txt
+py projects\screen-recorder\screen_recorder.py
 ```
 
 ## Implementation notes

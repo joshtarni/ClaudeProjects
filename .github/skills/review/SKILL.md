@@ -123,7 +123,9 @@ authorizes packaging with `/build-exe`.
      `Implementation` to `Rebuild required`, `Code review` to `Not reviewed`,
      `Packaging` to `Not authorized`, and overall `Status` to `Draft` until the
      user authorizes an implementation/rebuild after requirements review.
-     Preserve `Implementation: Not started` for projects without code.
+     Preserve `Implementation: Existing; review required` for adopted code
+     when a requirements edit does not itself change its required behavior;
+     preserve `Not started` for projects without code.
    - When requirements review passes, set overall `Status` to `Requirements
      approved`; do not authorize implementation. Preserve any
      `Rebuild required` state. Only `/build-script` after an explicit user
