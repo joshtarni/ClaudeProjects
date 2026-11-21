@@ -42,10 +42,15 @@ run a build, or package an executable.
    - Populate the **Recommendations** table with worthwhile non-blocking
      improvements, rationale, cost/trade-off, proposed disposition, and status.
      Do not label optional polish as critical.
+   - Use a checkbox scaffold table in `requirements.md`, with separate rows for
+     source entry points, modules, tests, fixtures, configuration, and packaging
+     deliverables. Link each row to requirement/test IDs and an implementation
+     phase. Use `[x]` only for present and verified behavior; use `[ ]` for
+     planned, missing, incomplete, or unverified work.
    - A proposed resolution is not an accepted resolution. Keep unresolved items
-     visible until the user and `/review` have accepted their resolution.
+     visible until the user and `/review-req` have accepted their resolution.
 4. **Iterate on the specification.**
-   - Recommend `/review` for a requirements review. Address each finding in
+   - Recommend `/review-req` for a requirements review. Address each finding in
      `requirements.md`, preserving an audit trail and marking review status.
    - For critical issues, propose a defensible mitigation grounded in project
      constraints and authoritative sources where relevant. Do not mark the
@@ -61,6 +66,9 @@ run a build, or package an executable.
 5. **Report the handoff.**
    - Link the requirements file and summarize unresolved critical issues,
      recommendations, assumptions, and the next review/build gate.
+   - Render unresolved critical issues and recommendations with their proposed
+     mitigations/dispositions in the chat response; do not tell the user to read
+     the requirements file as the in-session source for those decisions.
    - State plainly that no script code or executable was created.
 
 ## Hard Boundary

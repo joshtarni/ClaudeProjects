@@ -70,6 +70,29 @@ code review pass. Do not claim existing code is current merely because it runs.
 <Components, responsibilities, data flow, and key decisions. Distinguish facts
 from assumptions; link sources for external behavior.>
 
+### Proposed script scaffold
+
+<State whether this is a single-file script or a package. Include the entry
+point and each planned source, configuration, test, fixture, and packaging
+file or directory. Express the scaffold as a checkbox table: `[x]` means a
+function or deliverable is already present and satisfies the review scope;
+`[ ]` means it is planned but not yet implemented or not yet verified.>
+
+| Scaffold item | Function / deliverable | Requirement IDs | Phase | State |
+|---|---|---|---|---|
+| `<entry-point>.py` | Application entry point, startup, and main workflow | `<REQ-...>` | 1 | [ ] |
+| `<support-module>/` | `<Responsibility>` | `<REQ-...>` | 1 | [ ] |
+| `tests/` | Unit, integration, and acceptance coverage | `<TEST-...>` | 1 | [ ] |
+| `fixtures/` | Representative input and expected-output data | `<TEST-...>` | 1 | [ ] |
+| `<build-config-or-lockfile>` | Reproducible build and dependency configuration | `<REQ-...>` | 2 | [ ] |
+
+Use the existing implementation state to check items for adopted code:
+`[x]` only when the item exists and has passed the relevant review evidence;
+`[ ]` when it is missing, incomplete, not yet implemented, or not yet
+verified. Add every required source module, test area, fixture, configuration
+file, and packaging deliverable as a separate row. Group follow-on optional
+features only if they are explicitly in scope or recorded as recommendations.
+
 ### Planned files/modules
 
 | Path | Responsibility |
@@ -120,6 +143,11 @@ user accept, defer, or reject them.
 If none are identified, write `None identified` below the table; do not create
 a placeholder recommendation.
 
+At the end of `/review-req`, repeat the Critical Issues and Recommendations
+(Warnings) tables in the chat response with their full proposed mitigations and
+dispositions. The requirements file is the audit record; chat presentation is
+the user's in-session decision view.
+
 ## 11. Change Requests
 
 Add one entry per user-requested change. Link each item to requirements,
@@ -146,12 +174,13 @@ until the relevant re-review confirms it.
 
 - **Requirements review findings:** <None / list with IDs and status>
 - **Critical issue gate:** Blocked until every critical issue is resolved and
-  resolution has passed `/review`.
+  resolution has passed `/review-req`.
 - **Implementation authorization:** Not authorized until the user explicitly
   requests `/build-script` implementation from this reviewed document.
 - **Code review:** Must pass after implementation. Findings return to this
   document, invalidate the prior code-review pass, and require a requirements
-  review followed by an explicitly requested rebuild.
+  review only when they change requirements. Source-only findings keep a
+  passing requirements review and require an explicitly requested rebuild.
 - **Packaging:** Set to `Authorized` after code review passes. `/build-exe` may
   run only then and must set it to `Complete` only after a successful package.
 

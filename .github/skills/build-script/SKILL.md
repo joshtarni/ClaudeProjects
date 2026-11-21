@@ -21,18 +21,22 @@ It does not package an executable; `/build-exe` is a separate final step.
 3. Confirm all of the following before editing application source:
    - `Requirements review` is `Passed`.
    - No critical issue or blocking decision is unresolved.
-   - If this is a rebuild after code findings, each finding is recorded and
-     resolved in the requirements, the updated requirements review has passed,
-     and this user request explicitly authorizes the rebuild.
+   - If this is a rebuild after code findings:
+     - for source-only findings, leave the requirements pass unchanged and
+       record or resolve the source-fix scope in the review findings log
+     - for findings that change requirements, record them in the requirements,
+       pass an updated `/review-req`, and keep the review pass current
+     - this user prompt explicitly authorizes the rebuild
    - The user's prompt explicitly requests implementation from this
      requirements document. Merely invoking `/new-script`, `/change-script`,
-     or `/review`, or asking to prepare/revise the plan, is not authorization.
+     or `/review-req`/`/review-script`, or asking to prepare/revise the plan,
+     is not authorization.
    - For an adopted legacy project whose implementation status is
      `Existing; review required`, requirements review and code review must
      first pass before a requested change/rebuild can proceed. Preserve its
      behavior outside the approved Change Requests.
 4. If a precondition fails, do not edit application source. Explain the failed
-   gate and direct the user to `/review` or the missing decision.
+   gate and direct the user to `/review-req` or the missing decision.
 
 ## Implementation Procedure
 
@@ -57,13 +61,13 @@ It does not package an executable; `/build-exe` is a separate final step.
    proposed requirement correction in the findings log, set Requirements
    review to `Not reviewed`, Code review to `Not reviewed`, Packaging to `Not
    authorized`, and the overall status to `Draft`. Ask the user to resolve the
-   decision or run `/review` on the updated requirements before continuing.
-6. Hand off for `/review` code review. Do not invoke `/build-exe` or create a
+   decision or run `/review-req` on the updated requirements before continuing.
+6. Hand off for `/review-script` code review. Do not invoke `/build-exe` or create a
    standalone executable in this skill.
 
 ## Rebuilds After Code Review
 
-When `/review` finds code defects, it must record evidence and the proposed
+When `/review-script` finds code defects, it must record evidence and the proposed
 requirements correction, set implementation to `Rebuild required`, invalidate
 code-review and packaging approvals, and require a passing requirements review
 if the specification changed. Only after those gates pass and the user
@@ -75,4 +79,4 @@ it.
 
 Summarize implemented requirements and CR IDs, changed application files,
 checks performed and results, remaining limitations, and the next gate:
-`/review` code review. State that no standalone executable was packaged.
+`/review-script` code review. State that no standalone executable was packaged.

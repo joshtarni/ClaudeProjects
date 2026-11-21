@@ -2,6 +2,9 @@
 
 This repository contains agent workflow skills and script projects.
 
+For a quick guide to the repository workflows, see
+[guideMe.html](guideMe.html).
+
 ## Screen Area Recorder
 
 The existing Windows screen-area recorder is maintained in

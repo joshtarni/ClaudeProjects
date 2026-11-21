@@ -17,9 +17,10 @@ packaging step, not the implementation step. Before packaging, verify that the
 project's `requirements.md` has no unresolved critical issues, its latest
 requirements review passes, implementation is current, and code review passed.
 If a code review finding has set implementation to `Rebuild required`, stop:
-the requirements must be updated and re-reviewed, the user must request a
-build from those requirements, and the regenerated code must pass code review
-before packaging. Do not implement or modify application source in this skill.
+for source-only findings, stop until the user explicitly requests a rebuild
+with `/build-script` and the regenerated code passes `/review-script`; for
+requirements-changing findings, also update and re-review the requirements
+before rebuilding. Do not implement or modify application source in this skill.
 Invoking `/build-exe` is the user's explicit request to package; it does not
 override any failed or missing review gate.
 For managed script projects, also require `Packaging: Authorized` in

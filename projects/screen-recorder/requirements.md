@@ -100,8 +100,8 @@ Tkinter event loop through a queue. See the existing implementation and
 | Phase | Work | Exit criteria | Status |
 |---|---|---|---|
 | Adoption | Move the existing source, executable, dependencies, and project log into this folder; document the baseline. | Paths and repository docs agree; Python syntax and executable archive/startup checks pass. | Complete |
-| Requirements review | Compare this baseline with source, project docs, and user intent; resolve critical issues. | `/review` passes with critical issues resolved and status recorded. | Not started |
-| Code review | Review the adopted implementation against approved requirements. | `/review` reports no actionable implementation findings; limitations are recorded. | Not started |
+| Requirements review | Compare this baseline with source, project docs, and user intent; resolve critical issues. | `/review-req` passes with critical issues resolved and status recorded. | Not started |
+| Code review | Review the adopted implementation against approved requirements. | `/review-script` reports no actionable implementation findings; limitations are recorded. | Not started |
 | Change implementation | Implement only user-authorized, reviewed Change Requests. | Acceptance tests pass and implementation state is current. | Not started |
 | Packaging | Regenerate the standalone EXE after requirements and code reviews pass. | `/build-exe` succeeds, archive and startup are verified, and status is recorded. | Not authorized |
 
@@ -143,7 +143,7 @@ requirements baseline.
 ## 9. Critical Issues
 
 Critical issues block new implementation or packaging until resolved and
-accepted through `/review`.
+accepted through `/review-req`.
 
 | ID | Issue / unknown | Impact | Evidence / confidence | Proposed mitigation | Status | Review evidence |
 |---|---|---|---|---|---|---|

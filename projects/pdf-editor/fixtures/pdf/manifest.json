@@ -1,0 +1,196 @@
+{
+  "generated_at": "2026-11-21",
+  "fixtures": [
+    {
+      "name": "valid",
+      "file": "valid.pdf",
+      "category": "valid",
+      "dialect": "PDF 1.7",
+      "page_count": 1,
+      "expected_text": [
+        "Fixture text"
+      ],
+      "expected_images": 0,
+      "expected_forms": 0,
+      "open_result": "pass",
+      "operation_results": {
+        "open": "pass",
+        "save": "pass"
+      },
+      "sha256": "cdb17cf0a21394cf912248eaa23fe8b42505fcd91d6af8ecce6ac5deead6306a"
+    },
+    {
+      "name": "damaged",
+      "file": "damaged.pdf",
+      "category": "malformed",
+      "dialect": "invalid",
+      "page_count": null,
+      "expected_text": [],
+      "expected_images": 0,
+      "expected_forms": 0,
+      "open_result": "fail",
+      "operation_results": {
+        "open": "fail",
+        "save": "not-applicable"
+      },
+      "sha256": "07bcbca5e5cff5eadb6a3578850bb9413f9bfd2406d9210b0c25b7f78449889a"
+    },
+    {
+      "name": "encrypted",
+      "file": "encrypted.pdf",
+      "category": "password-protected",
+      "dialect": "PDF 1.7 encryption",
+      "page_count": 1,
+      "expected_text": [],
+      "expected_images": 0,
+      "expected_forms": 0,
+      "open_result": "password-required",
+      "operation_results": {
+        "open": "password-required",
+        "save": "not-applicable"
+      },
+      "sha256": "6958a8f0be7fc19e28dc52fdb1d87bcbdcde71a17505692bc0e17d369ab660b6"
+    },
+    {
+      "name": "form",
+      "file": "form.pdf",
+      "category": "standard AcroForm",
+      "dialect": "PDF 1.7/AcroForm",
+      "page_count": 1,
+      "expected_text": [
+        "Form fixture"
+      ],
+      "expected_images": 0,
+      "expected_forms": 1,
+      "open_result": "pass",
+      "operation_results": {
+        "open": "pass",
+        "form-read": "pass",
+        "form-save": "pass"
+      },
+      "sha256": "5208130455006658a0d7c3ef227e535f3514e2d307a99a8cfa5ad132c98a5b79"
+    },
+    {
+      "name": "malformed-form",
+      "file": "malformed_acroform.pdf",
+      "category": "malformed AcroForm",
+      "dialect": "PDF 1.7/AcroForm",
+      "page_count": 1,
+      "expected_text": [
+        "Malformed form fixture"
+      ],
+      "expected_images": 0,
+      "expected_forms": "unsupported-fields",
+      "open_result": "pass-with-warning",
+      "operation_results": {
+        "open": "pass",
+        "form-read": "warning",
+        "form-save": "not-applicable"
+      },
+      "sha256": "450d33ddb750e33d90d5b05cd815cf4982b499e3928f34b3bd8db4e98f69f13c"
+    },
+    {
+      "name": "text-only",
+      "file": "text-only.pdf",
+      "category": "text-only",
+      "dialect": "PDF 1.7",
+      "page_count": 1,
+      "expected_text": [
+        "TEXT ONLY FIXTURE"
+      ],
+      "expected_images": 0,
+      "expected_forms": 0,
+      "open_result": "pass",
+      "operation_results": {
+        "open": "pass",
+        "text-extract": "pass",
+        "save": "pass"
+      },
+      "sha256": "6d757dc9f38cee683879cd7b538f13939a03442de0e7187d16c282059c448c6c"
+    },
+    {
+      "name": "annotation",
+      "file": "annotation.pdf",
+      "category": "annotation",
+      "dialect": "PDF 1.7",
+      "page_count": 1,
+      "expected_text": [],
+      "expected_images": 0,
+      "expected_forms": 0,
+      "open_result": "pass",
+      "operation_results": {
+        "open": "pass",
+        "annotation-save": "pass"
+      },
+      "sha256": "024b4a3039b26ee507a378e9961805cf487fe13b9905c86e39b8ea3fd4dba61f"
+    },
+    {
+      "name": "image",
+      "file": "image.pdf",
+      "category": "image-only",
+      "dialect": "PDF 1.7",
+      "page_count": 1,
+      "expected_text": [
+        "Text fixture"
+      ],
+      "expected_images": 1,
+      "expected_forms": 0,
+      "open_result": "pass",
+      "operation_results": {
+        "open": "pass",
+        "image-extract": "pass"
+      },
+      "sha256": "3933344acdc7f268fa686089f98f42b54992e75274446269fcf06fb923b449aa"
+    },
+    {
+      "name": "watermark",
+      "file": "watermark.pdf",
+      "category": "watermark",
+      "dialect": "PDF 1.7",
+      "page_count": 1,
+      "expected_text": [
+        "Watermark fixture",
+        "WATERM"
+      ],
+      "expected_images": 0,
+      "expected_forms": 0,
+      "open_result": "pass",
+      "operation_results": {
+        "open": "pass",
+        "watermark": "pass"
+      },
+      "sha256": "6ee336a95c54ab8898ecf753f9a8df9e9be82d23bca64a4373f6c4071d1dc228"
+    },
+    {
+      "name": "100-page",
+      "file": "100-page.pdf",
+      "category": "100-page",
+      "dialect": "PDF 1.7",
+      "page_count": 100,
+      "expected_text": [
+        "Page text by page number where present"
+      ],
+      "expected_images": 0,
+      "expected_forms": 0,
+      "open_result": "pass",
+      "operation_results": {
+        "open": "pass",
+        "thumbnail-navigation": "pass"
+      },
+      "sha256": "5495af6af53db4f956a748ebd3c41f0fe1adaf3a840319d5dc35e411908a3436"
+    }
+  ],
+  "viewer_matrix": {
+    "valid": "pass",
+    "damaged": "pass",
+    "encrypted": "pass",
+    "form": "pass",
+    "malformed-form": "pass",
+    "text-only": "pass",
+    "annotation": "pass",
+    "image": "pass",
+    "watermark": "pass",
+    "100-page": "pass"
+  },
+  "notes": "Deterministic local fixtures with machine-verifiable hashes. Initial-release acceptance is performed in the application; external PDF-viewer validation is out of scope."
+}

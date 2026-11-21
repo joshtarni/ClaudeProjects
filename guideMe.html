@@ -1,0 +1,566 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f5f7fb">
+  <title>ClaudeProjects | Quick Guide</title>
+  <style>
+    :root {
+      font-family: "Segoe UI", Inter, system-ui, sans-serif;
+      color: #17233b;
+      background: #f5f7fb;
+      font-synthesis: none;
+      text-rendering: optimizeLegibility;
+      line-height: 1.6;
+      --muted: #60708a;
+      --line: #e2e8f2;
+      --blue: #4169e1;
+      --blue-pale: #edf2ff;
+      --teal: #087f8c;
+      --teal-pale: #e8f7f7;
+      --violet: #7451c8;
+      --violet-pale: #f2edff;
+      --orange: #a95a18;
+      --orange-pale: #fff3e7;
+      --surface: #fff;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      padding: 38px 20px 56px;
+    }
+
+    main {
+      width: min(100%, 980px);
+      margin: 0 auto;
+    }
+
+    a { color: var(--blue); }
+
+    .hero {
+      position: relative;
+      overflow: hidden;
+      padding: clamp(28px, 6vw, 56px);
+      border-radius: 24px;
+      color: #fff;
+      background:
+        radial-gradient(ellipse at 85% 15%, #819af6 0, transparent 34%),
+        linear-gradient(125deg, #172b55, #315bc1 72%, #5477dc);
+      box-shadow: 0 18px 45px #263e7525;
+    }
+
+    .eyebrow {
+      margin: 0 0 10px;
+      color: #c9d6ff;
+      font-size: 0.78rem;
+      font-weight: 750;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+    }
+
+    h1 {
+      max-width: 650px;
+      margin: 0;
+      font-size: clamp(2.15rem, 6vw, 3.5rem);
+      letter-spacing: -0.045em;
+      line-height: 1.08;
+    }
+
+    .hero p:last-child {
+      max-width: 620px;
+      margin: 18px 0 0;
+      color: #e3eaff;
+      font-size: 1.05rem;
+    }
+
+    .hero a { color: #fff; }
+
+    .section { margin-top: 42px; }
+
+    .section-heading {
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+
+    h2 {
+      margin: 0;
+      font-size: clamp(1.35rem, 3vw, 1.75rem);
+      letter-spacing: -0.025em;
+      line-height: 1.25;
+    }
+
+    .section-heading p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.92rem;
+    }
+
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .card {
+      min-height: 180px;
+      padding: 20px;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: var(--surface);
+      box-shadow: 0 4px 14px #1e34500a;
+    }
+
+    .card-top {
+      display: flex;
+      align-items: center;
+      gap: 11px;
+      margin-bottom: 12px;
+    }
+
+    .icon {
+      display: grid;
+      width: 38px;
+      height: 38px;
+      flex: 0 0 38px;
+      place-items: center;
+      border-radius: 12px;
+      color: var(--blue);
+      background: var(--blue-pale);
+      font-size: 1.05rem;
+      font-weight: 800;
+    }
+
+    .card:nth-child(3n + 2) .icon {
+      color: var(--teal);
+      background: var(--teal-pale);
+    }
+
+    .card:nth-child(3n) .icon {
+      color: var(--violet);
+      background: var(--violet-pale);
+    }
+
+    .card h3 {
+      margin: 0;
+      font-size: 1.02rem;
+      line-height: 1.3;
+    }
+
+    code {
+      padding: 2px 6px;
+      border-radius: 6px;
+      color: #2f4d9e;
+      background: #edf2ff;
+      font: 0.9em "Cascadia Code", Consolas, monospace;
+      white-space: nowrap;
+    }
+
+    .card p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.94rem;
+    }
+
+    .workflow {
+      padding: 24px;
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      background: var(--surface);
+      box-shadow: 0 4px 14px #1e34500a;
+    }
+
+    .flow-scroll {
+      overflow-x: auto;
+      padding-bottom: 8px;
+    }
+
+    .flow-canvas { width: 890px; }
+
+    .flow-main {
+      display: grid;
+      grid-template-columns: repeat(5, 130px 22px) 130px;
+      align-items: center;
+    }
+
+    .flow-node {
+      min-width: 0;
+      min-height: 116px;
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: 13px;
+      background: color-mix(in srgb, var(--surface) 88%, var(--blue-pale));
+    }
+
+    .flow-node.entry { border-top: 3px solid var(--violet); }
+    .flow-node.review { border-top: 3px solid var(--blue); }
+    .flow-node.build { border-top: 3px solid var(--teal); }
+    .flow-node.package { border-top: 3px solid var(--orange); }
+
+    .flow-kicker {
+      display: block;
+      margin-bottom: 6px;
+      color: var(--muted);
+      font-size: 0.64rem;
+      font-weight: 750;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    .flow-node h3 {
+      margin: 0;
+      font-size: 0.84rem;
+      line-height: 1.4;
+    }
+
+    .flow-node p {
+      margin: 6px 0 0;
+      color: var(--muted);
+      font-size: 0.73rem;
+      line-height: 1.5;
+    }
+
+    .flow-node code {
+      display: inline-block;
+      margin: 2px 0;
+    }
+
+    .flow-arrow {
+      position: relative;
+      height: 2px;
+      background: #9aaccb;
+    }
+
+    .flow-arrow::after {
+      position: absolute;
+      top: 50%;
+      right: -1px;
+      width: 8px;
+      height: 8px;
+      border-top: 2px solid #8298be;
+      border-right: 2px solid #8298be;
+      content: "";
+      transform: translateY(-50%) rotate(45deg);
+    }
+
+    .return-arrows {
+      display: block;
+      width: 890px;
+      height: 112px;
+      overflow: visible;
+    }
+
+    .return-arrows > path {
+      fill: none;
+      stroke: #d08b4e;
+      stroke-width: 1.7;
+      stroke-dasharray: 4 3;
+      marker-end: url(#return-arrowhead);
+    }
+
+    .return-arrows text {
+      fill: var(--orange);
+      font: 600 10px "Segoe UI", sans-serif;
+      text-anchor: middle;
+    }
+
+    .workflow-note {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      margin-top: 18px;
+      padding: 15px 17px;
+      border-radius: 13px;
+      color: #74583d;
+      background: var(--orange-pale);
+      font-size: 0.9rem;
+    }
+
+    .workflow-note strong { color: var(--orange); }
+
+    .side-workflow {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 10px;
+      margin-top: 15px;
+      padding: 14px 16px;
+      border: 1px solid var(--line);
+      border-radius: 13px;
+      color: var(--muted);
+      background: color-mix(in srgb, var(--surface) 90%, var(--violet-pale));
+      font-size: 0.88rem;
+    }
+
+    .side-workflow strong { color: var(--violet); }
+
+    .side-arrow {
+      color: #8799b8;
+      font-size: 1.15rem;
+      font-weight: 800;
+    }
+
+    .project-card {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      padding: 22px 24px;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: var(--surface);
+    }
+
+    .project-card p { margin: 5px 0 0; color: var(--muted); }
+
+    .project-links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .button {
+      display: inline-block;
+      padding: 9px 13px;
+      border: 1px solid #dbe3f1;
+      border-radius: 10px;
+      color: #294681;
+      background: #f8faff;
+      font-size: 0.88rem;
+      font-weight: 700;
+      text-decoration: none;
+    }
+
+    .button:hover { background: var(--blue-pale); }
+
+    .footer-note {
+      margin: 22px 0 0;
+      color: var(--muted);
+      text-align: center;
+      font-size: 0.9rem;
+    }
+
+    @media (max-width: 720px) {
+      .cards { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .section-heading { align-items: start; flex-direction: column; }
+    }
+
+    @media (max-width: 520px) {
+      body { padding: 16px 14px 36px; }
+      .hero { border-radius: 18px; }
+      .cards { grid-template-columns: 1fr; }
+      .card { min-height: 0; }
+      .project-card { align-items: start; flex-direction: column; }
+      .workflow { padding: 16px; }
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        color: #e7edf8;
+        background: #111827;
+        --muted: #a8b4c8;
+        --line: #2b374b;
+        --surface: #192335;
+        --blue-pale: #202f50;
+        --teal-pale: #17383d;
+        --violet-pale: #302748;
+        --orange-pale: #382a20;
+      }
+
+      .hero {
+        background:
+          radial-gradient(ellipse at 85% 15%, #566fc0 0, transparent 34%),
+          linear-gradient(125deg, #101c34, #243e80 72%, #3854a1);
+      }
+
+      .card:nth-child(3n + 2) .icon { color: #66d0d2; }
+      .card:nth-child(3n) .icon { color: #b7a0ff; }
+      code {
+        color: #d7e2ff;
+        background: #29395b;
+      }
+      .workflow-note { color: #dbc3a8; }
+      .return-arrows > path { stroke: #c28a55; }
+      .return-arrows text { fill: #ffc184; }
+      .flow-arrow { background: #536687; }
+      .flow-arrow::after { border-color: #8299c0; }
+      .button { border-color: #39475e; color: #c7d4f4; background: #202c40; }
+      .button:hover { background: #293a5b; }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <header class="hero">
+      <p class="eyebrow">A quick start to this workspace</p>
+      <h1>Make the next step clear.</h1>
+      <p>
+        ClaudeProjects combines reusable Copilot workflows with script projects.
+        Start with the skill that fits your task, and let its requirements guide
+        the work from idea to release. See the
+        <a href=".github/copilot-instructions.md">repository instructions</a>
+        for the shared rules.
+      </p>
+    </header>
+
+    <section class="section" aria-labelledby="workflows-title">
+      <div class="section-heading">
+        <h2 id="workflows-title">Pick a workflow</h2>
+        <p>Each skill has one job; use it when that job is needed.</p>
+      </div>
+      <div class="cards">
+        <article class="card">
+          <div class="card-top">
+            <span class="icon" aria-hidden="true">01</span>
+            <h3><code>/new-script</code></h3>
+          </div>
+          <p>Plan a new script in a requirements file. It does not create application code.</p>
+        </article>
+        <article class="card">
+          <div class="card-top">
+            <span class="icon" aria-hidden="true">02</span>
+            <h3><code>/change-script</code></h3>
+          </div>
+          <p>Record and analyze a change request for an existing script project.</p>
+        </article>
+        <article class="card">
+          <div class="card-top">
+            <span class="icon" aria-hidden="true">03</span>
+            <h3><code>/review-req</code></h3>
+          </div>
+          <p>Review requirements, scaffold, risks, and acceptance criteria only.</p>
+        </article>
+        <article class="card">
+          <div class="card-top">
+            <span class="icon" aria-hidden="true">04</span>
+            <h3><code>/build-script</code></h3>
+          </div>
+          <p>Implement from reviewed requirements after you explicitly request the build.</p>
+        </article>
+        <article class="card">
+          <div class="card-top">
+            <span class="icon" aria-hidden="true">05</span>
+            <h3><code>/review-script</code></h3>
+          </div>
+          <p>Review implemented source and tests without changing or rebuilding code.</p>
+        </article>
+        <article class="card">
+          <div class="card-top">
+            <span class="icon" aria-hidden="true">06</span>
+            <h3><code>/build-exe</code></h3>
+          </div>
+          <p>Package an approved, current implementation as a Windows executable.</p>
+        </article>
+        <article class="card">
+          <div class="card-top">
+            <span class="icon" aria-hidden="true">07</span>
+            <h3><code>/commit-push</code></h3>
+          </div>
+          <p>Review pending changes, commit, and push when you explicitly ask.</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="section" aria-labelledby="workflow-title">
+      <div class="section-heading">
+        <h2 id="workflow-title">How a project moves forward</h2>
+        <p>Follow the arrows; review outcomes can send work back for another pass.</p>
+      </div>
+      <div class="workflow" role="group" aria-label="Script project workflow diagram">
+        <div class="flow-scroll" tabindex="0" aria-label="Scrollable horizontal workflow diagram">
+          <div class="flow-canvas">
+            <div class="flow-main">
+              <article class="flow-node entry">
+                <span class="flow-kicker">Start</span>
+                <h3><code>/new-script</code> or <code>/change-script</code></h3>
+                <p>Plan a project or request a change.</p>
+              </article>
+              <span class="flow-arrow" aria-hidden="true"></span>
+              <article class="flow-node entry">
+                <span class="flow-kicker">Specify</span>
+                <h3>Write or update requirements</h3>
+                <p>Agree on behavior, risks, and acceptance checks.</p>
+              </article>
+              <span class="flow-arrow" aria-hidden="true"></span>
+              <article class="flow-node review">
+                <span class="flow-kicker">Gate 1 · Requirements</span>
+                <h3><code>/review-req</code></h3>
+                <p>Pass requirements review and resolve blockers before implementation.</p>
+              </article>
+              <span class="flow-arrow" aria-hidden="true"></span>
+              <article class="flow-node build">
+                <span class="flow-kicker">Explicit request</span>
+                <h3><code>/build-script</code></h3>
+                <p>Implement the approved requirements and run checks.</p>
+              </article>
+              <span class="flow-arrow" aria-hidden="true"></span>
+              <article class="flow-node review">
+                <span class="flow-kicker">Gate 2 · Code</span>
+                <h3><code>/review-script</code></h3>
+                <p>Verify implementation against requirements and tests.</p>
+              </article>
+              <span class="flow-arrow" aria-hidden="true"></span>
+              <article class="flow-node package">
+                <span class="flow-kicker">Optional release</span>
+                <h3><code>/build-exe</code></h3>
+                <p>Package after code review passes and authorization.</p>
+              </article>
+            </div>
+            <svg class="return-arrows" viewBox="0 0 890 112" role="img"
+              aria-label="Dashed return arrows: requirements review returns to requirements; code review can return to implementation or requirements when they change.">
+              <defs>
+                <marker id="return-arrowhead" markerWidth="7" markerHeight="7"
+                  refX="5" refY="3.5" orient="auto">
+                  <path d="M 0 0 L 6 3.5 L 0 7" fill="none" stroke="#d08b4e" stroke-width="1.4"></path>
+                </marker>
+              </defs>
+              <path d="M 369 0 V 32 H 217 V 3"></path>
+              <text x="293" y="49">revise requirements</text>
+              <path d="M 673 0 V 32 H 521 V 3"></path>
+              <text x="597" y="49">explicit rebuild: /build-script</text>
+              <path d="M 700 0 V 72 H 369 V 3"></path>
+              <text x="535" y="90">if requirements change: review them again</text>
+            </svg>
+          </div>
+        </div>
+        <div class="workflow-note">
+          <span aria-hidden="true">↶</span>
+          <div><strong>Dashed arrows show rework routes.</strong> A failed review loops back to the relevant work; any build or package still requires its separate authorization.</div>
+        </div>
+        <div class="side-workflow">
+          <strong>Separate Git task:</strong>
+          <code>/commit-push</code>
+          <span class="side-arrow" aria-hidden="true">→</span>
+          Review pending changes, commit, and push when explicitly requested.
+        </div>
+      </div>
+    </section>
+
+    <section class="section" aria-labelledby="project-title">
+      <div class="section-heading">
+        <h2 id="project-title">Already in the repo</h2>
+        <p>Use the project requirements as the source of truth.</p>
+      </div>
+      <div class="project-card">
+        <div>
+          <h3>Screen Area Recorder</h3>
+          <p>Existing Windows recorder project. Check its current review and packaging status before making changes.</p>
+        </div>
+        <div class="project-links">
+          <a class="button" href="projects/screen-recorder/requirements.md">View requirements</a>
+          <a class="button" href="projects/screen-recorder/">Open project</a>
+        </div>
+      </div>
+      <p class="footer-note">
+        For ordinary questions or coding tasks, just describe what you need in chat.
+        A separate workflow-guide agent is optional—not necessary for choosing these steps.
+      </p>
+    </section>
+  </main>
+</body>
+</html>
