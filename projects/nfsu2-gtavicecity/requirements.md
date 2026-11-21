@@ -3,7 +3,7 @@
 ## Document Control
 
 - **Status:** Draft
-- **Requirements review:** Passed
+- **Requirements review:** Not reviewed
 - **Implementation:** Rebuild required
 - **Code review:** Not reviewed
 - **Packaging:** Not authorized
@@ -78,7 +78,7 @@ existing launcher does not satisfy this purpose.
 | REQ-016 | Provide a local vehicle ownership and garage loop with at least one earnable upgrade or customization change. | Must | An earned reward can be spent in a garage; the vehicle change and resulting gameplay state persist after save/load. | Proposed |
 | REQ-017 | Save and load single-player progress locally without cloud or account services. | Must | Save/reload preserves mission/event progress, currency, and owned vehicle configuration with networking disabled. | Proposed |
 | REQ-018 | Create original game-specific implementation and use original or properly licensed content. Reuse third-party source code only after the exact revision, license, and obligations are reviewed and recorded. Do not copy or extract proprietary code, assets, maps, characters, music, story, or saves from either source game. | Must | Source/content audit finds no copied or extracted source-game material; each reused component has a compatible documented license and required notices. | Proposed |
-| REQ-019 | Unreal Engine 5.5.4 is the selected engine. Implement in C++ and support Windows 11 64-bit as the minimum and tested baseline. Before implementation, document the exact Visual Studio/SDK/build-tool requirements and all runtime redistributables. | Must | The game launches and passes the acceptance checks with Unreal Engine 5.5.4 and C++ on Windows 11 64-bit, using only the documented build tools and runtime dependencies. | Proposed |
+| REQ-019 | Unreal Engine 5.8.4 is the selected engine. Implement in C++ and support Windows 11 64-bit as the minimum and tested baseline. Before implementation, document the exact Visual Studio/SDK/build-tool requirements and all runtime redistributables. | Must | The game launches and passes the acceptance checks with Unreal Engine 5.8.4 and C++ on Windows 11 64-bit, using only the documented build tools and runtime dependencies. | Proposed |
 | REQ-020 | Keep the game single-player and usable offline after installation; no accounts, multiplayer, telemetry, cloud saves, online fallback, or runtime remote-content requirements. | Must | With networking disabled, the complete acceptance loop runs and network monitoring shows no outbound attempt by the game. | Proposed |
 | REQ-021 | Bound the first playable release to one small original city area, one drivable vehicle, one race event, one story mission, one police pursuit, and one garage/economy/upgrade loop. | Must | Each listed feature is present and playable in the same offline session. | Proposed |
 | REQ-022 | Define deterministic first-release progression values: race reward 500 currency, story-mission reward 300 currency, starting currency 0, and one earnable upgrade costing 400 currency and increasing configured baseline top speed by exactly 10%. | Must | Acceptance fixtures start at 0 currency, show the configured rewards once, and verify the 400-currency upgrade increases baseline top speed by exactly 10% and is unaffordable until 400 earned currency is available. | Proposed |
@@ -91,7 +91,7 @@ existing launcher does not satisfy this purpose.
   or network input.
 - **Outputs:** Playable local game state, locally persisted progress, and
   user-visible gameplay feedback. No network output.
-- **Platform/runtime:** Unreal Engine 5.5.4 is the selected engine. Windows 11
+- **Platform/runtime:** Unreal Engine 5.8.4 is the selected engine. Windows 11
   64-bit is the minimum and tested baseline. The implementation language,
   exact Visual Studio/SDK/build-tool requirements, and runtime redistributables
   remain to be documented before implementation.
@@ -116,7 +116,7 @@ Public repositories may inform requirements and technical research. Any
 source-code reuse requires a separate review of the exact repository revision,
 all applicable licenses, third-party components, and any conditions before
 implementation. Repository visibility alone is not permission. Do not use
-source-game assets, maps, music, story, or extracted data. Unreal Engine 5.5.4 and Windows 11 64-bit are selected, with C++ implementation.
+source-game assets, maps, music, story, or extracted data. Unreal Engine 5.8.4 and Windows 11 64-bit are selected, with C++ implementation.
 Record the input approach, exact build tools, runtime dependencies, and tested
 Windows environment before implementation.
 
@@ -124,7 +124,7 @@ Windows environment before implementation.
 
 | Scaffold item | Function / deliverable | Requirement IDs | Phase | State |
 |---|---|---|---|---|
-| Game project root and engine configuration | One Unreal Engine 5.5.4 C++ Windows 11 game application and reproducible local project setup | REQ-012, REQ-019, REQ-020 | 1 | [ ] Runtime and build dependencies not yet documented |
+| Game project root and engine configuration | One Unreal Engine 5.8.4 C++ Windows 11 game application and reproducible local project setup | REQ-012, REQ-019, REQ-020 | 1 | [ ] Runtime and build dependencies not yet documented |
 | World and vehicle systems | Original small city, driveable vehicle, camera, and controls | REQ-013, REQ-021 | 1 | [ ] |
 | Race, mission, pursuit, and progression systems | Integrated playable activities and reward loop | REQ-014, REQ-015, REQ-021 | 1–2 | [ ] |
 | Garage and local save system | Vehicle ownership, customization, economy, and persistence | REQ-016, REQ-017, REQ-021 | 1–2 | [ ] |
@@ -147,7 +147,7 @@ Windows environment before implementation.
 
 | Phase | Work | Exit criteria | Status |
 |---|---|---|---|
-| 0 | Complete the requirements re-review, document the UE 5.5.4 build environment, and audit proposed code/content sources. | Requirements review passes; engine, build tools, runtime dependencies, and source/license decisions are documented. | Passed |
+| 0 | Complete the requirements re-review, document the UE 5.8.4 build environment, and audit proposed code/content sources. | Requirements review passes; engine, build tools, runtime dependencies, and source/license decisions are documented. | Not passed |
 | 1 | Create the playable vertical slice in a small original city. | Player can drive, complete a race and story mission, experience a police pursuit, use a garage/upgrade loop, and save/load locally. | Not started |
 | 2 | Validate full offline loop, Windows behavior, persistence, and content/source compliance. | TEST-001–TEST-008 pass on the documented environment. | Not started |
 | 3 | Optional private local packaging only after the user explicitly requests it and gates pass. | Package contains the game only, has compliant notices, and works offline. | Not authorized |
@@ -196,7 +196,7 @@ superseded launcher and is not evidence that these game tests pass.
 | CRIT-002 | Offline behavior of the original linked editions is unverified. | Irrelevant to the new game unless either original edition is later proposed as a dependency. | The new scope is a standalone original game, not integration of either web edition. | Keep both original games out of the runtime and verify the new game itself with TEST-006. | Superseded for current scope by CR-001 | CR-001; REQ-012, REQ-020 |
 | CRIT-003 | “Those two games as one” was previously interpreted as a launcher, contrary to the user's intent. | The launcher cannot provide the requested combined gameplay. | The user clarified that they want the mechanics combined in one offline game for private play. | Replace launcher requirements with the shared-world playable-game requirements in CR-001; do not treat launcher completion as satisfying this project. | Resolved by user clarification 2026-11-22 | CR-001; REQ-012–REQ-021 |
 | CRIT-004 | The requested open-world driving game is too broad for an unbounded first build. | Attempting a full commercial-scale city/game could stall before anything is playable. | The requested systems span driving, racing, missions, pursuits, economy, collection, and customization. | Deliver the bounded vertical slice in REQ-021 first; defer expansion until that slice passes acceptance. | Resolved; bounded by REQ-021 | CR-001; REQ-021; TEST-001–TEST-008 |
-| CRIT-005 | The implementation language and exact build/runtime environment were initially undecided. | The implementation language affects tooling and repository structure; exact build dependencies remain implementation documentation work. | C++ was explicitly selected for Unreal Engine 5.5.4; REQ-019 now records the decision and retains exact toolchain documentation as a Phase 0 implementation prerequisite. | Document exact Visual Studio/SDK/build-tool and runtime requirements before implementation. | Resolved; implementation prerequisite | REQ-019; REC-004 |
+| CRIT-005 | The implementation language and exact build/runtime environment were initially undecided. | The implementation language affects tooling and repository structure; exact build dependencies remain implementation documentation work. | C++ was selected for Unreal Engine 5.8.4; REQ-019 records the decision and retains exact toolchain documentation as a Phase 0 implementation prerequisite. | Document exact Visual Studio/SDK/build-tool and runtime requirements before implementation. | Resolved; implementation prerequisite | REQ-019; REC-004 |
 | CRIT-006 | Pursuit detection ranges, police contact, safe-road position, and upgrade vehicle effect were previously undefined. | Undefined predicates prevented TEST-004 and TEST-005 from being unambiguously passable or failable. | REQ-023 and TEST-004–TEST-005 now define 25-metre detection, 1-metre capture contact, city garage entrance respawn, and a 10% top-speed upgrade. | No further correction required for first-release acceptance. | Resolved | REQ-022–REQ-024; TEST-004–TEST-005 |
 
 ## 10. Recommendations
@@ -214,6 +214,7 @@ superseded launcher and is not evidence that these game tests pass.
 | ID | User intent and change | Affected requirements/files | Acceptance criteria | Dependencies and risks | Tests / phase impact | Status |
 |---|---|---|---|---|---|---|
 | CR-001 | Replace the two-title launcher concept with one private, offline, single-player game combining open-world driving, street races/events, car upgrades/tuning/customization, story missions/progression, police pursuits, economy/garages, and vehicle collection in one shared world. The user also asked that public repositories for both games be used as help. | Supersedes launcher REQ-001–REQ-010; retains Windows target and updates REQ-011; adds REQ-012–REQ-024. Affects `requirements.md` and the future game project; existing `app.py`, `launcher.py`, and `config.py` do not implement this scope. | One game starts locally; all listed systems work in one shared-world vertical slice; the loop is playable with networking disabled; local progress persists; no copied/extracted source-game assets or unreviewed code are included. | Unreal Engine 5.5.4, C++, and Windows 11 64-bit are resolved. Pursuit, economy, upgrade, save, and provenance predicates are defined. Exact build tools remain a Phase 0 implementation prerequisite. | Add TEST-001–TEST-008 plus REQ-022–REQ-024 fixtures. Requirements review passed; implementation remains Rebuild required; code review resets; packaging is not authorized. | Passed; implementation not authorized |
+| CR-002 | Change the selected engine from Unreal Engine 5.5.4 to Unreal Engine 5.8.4 because 5.8.4 is the version available for installation. Preserve C++, Windows 11 64-bit, the combined-game scope, offline behavior, progression values, pursuits, save schema, and all other approved gameplay requirements. | REQ-019; DEC-008; CRIT-005; the engine configuration row and Phase 0; all engine-build references. | The game is built and launched with Unreal Engine 5.8.4 and C++, and TEST-001–TEST-008 pass on Windows 11 64-bit using the documented build tools and runtime dependencies. | Engine 5.8.4 compatibility, exact Visual Studio/SDK/toolchain versions, and plugin/MCP compatibility remain to be verified before implementation. | Re-run requirements review, then `/build-script` authorization and implementation; reset code review and packaging. | Draft; requirements review required |
 
 ## 12. Review Findings and Resolution Log
 
@@ -231,13 +232,15 @@ superseded launcher and is not evidence that these game tests pass.
 | RF-010 | Requirements correction 2026-11-22 | Selected Unreal Engine 5.5.4 and Windows 11 64-bit; added deterministic progression, pursuit, garage, save, and malformed-save acceptance fixtures. | REQ-019, REQ-022–REQ-024, TEST-003–TEST-005, CRIT-005–CRIT-006 | C++ and explicit pursuit/upgrade predicates remained to be selected; those blockers were subsequently corrected. | Resolved |
 | RF-011 | Requirements re-review 2026-11-22 | REQ-019 and the implementation language remained to be completed. | REQ-019; CRIT-005; DEC-008 | User selected C++; requirements now require C++ and defer only exact build-tool documentation to the implementation prerequisite. | Resolved |
 | RF-012 | Requirements re-review 2026-11-22 | REQ-023 and TEST-004–TEST-005 did not define exact detection/contact/respawn/upgrade predicates. | REQ-023, TEST-004, TEST-005, CRIT-006 | User selected 25-metre detection, 1-metre capture contact, city garage entrance respawn, and 10% top-speed upgrade; requirements and tests now match. | Resolved |
+| RF-013 | Code review 2026-11-22 | The implementation is still the historical Python two-title launcher. It has no Unreal project, shared city, driveable vehicle, race, story mission, pursuit, garage/economy/upgrade, or local combined-game save implementation. | CR-001; REQ-012–REQ-024; TEST-001–TEST-008 | Rebuild the bounded combined-game vertical slice described by CR-001 and add engine-native gameplay/persistence/offline acceptance coverage; preserve the passing requirements unchanged as source-only rebuild scope. | Open |
+| RF-014 | Change request 2026-11-22 | Epic Games Launcher exposed Unreal Engine 5.8.4 rather than 5.5.4; the selected engine requirement was still 5.5.4. | CR-002; REQ-019; DEC-008 | User selected 5.8.4. Update REQ-019 and all engine-specific requirements/history notes, then pass `/review-req` before implementation. | Open; requirements review required |
 
 ## 13. Review and Build Gate
 
-- **Requirements review:** Passed. No unresolved critical findings remain.
-- **Critical issue gate:** Closed for requirements review; exact build-tool documentation remains a Phase 0 implementation prerequisite.
+- **Requirements review:** Not reviewed. CR-002 changes the selected engine and requires re-review.
+- **Critical issue gate:** Open until the Unreal 5.8.4 toolchain and plugin compatibility are documented and requirements review passes.
 - **Implementation:** Rebuild required. Existing source and any existing launcher package implement only the superseded launcher scope; no combined game has been built.
-- **Code review:** Not reviewed for the combined-game requirements.
+- **Code review:** Not reviewed. The prior combined-game code review failure remains historical but is reset pending the rebuilt implementation.
 - **Packaging:** Not authorized. No new game package was created for CR-001; the user's stated intent is private local play, not release or distribution.
 - **Historical evidence:** The prior launcher had 13 passing tests and a launcher-only packaged executable. This evidence does not satisfy the game requirements.
 
@@ -252,7 +255,7 @@ superseded launcher and is not evidence that these game tests pass.
 | DEC-005 | The requested game combines all selected gameplay systems in one shared open world. | User | Accepted | User selected free driving, races, customization, story/progression, police, economy/garages/collection, and shared-world integration, 2026-11-22 |
 | DEC-006 | The game is for the user's private offline play and is not intended for public release. | User | Accepted | User clarification, 2026-11-22 |
 | DEC-007 | Public repositories may be used as help. | User | Accepted with license/provenance gate | CR-001; REQ-018; TEST-007 |
-| DEC-008 | Unreal Engine 5.5.4 is the selected engine; C++ is the implementation language; Windows 11 64-bit is the minimum and tested baseline. | User/project | Accepted | Selected 2026-11-22 |
+| DEC-008 | Unreal Engine 5.8.4 is the selected engine; C++ is the implementation language; Windows 11 64-bit is the minimum and tested baseline. | User/project | Accepted by CR-002 | Changed from 5.5.4 to 5.8.4 on 2026-11-22 |
 
 ## 15. References
 
